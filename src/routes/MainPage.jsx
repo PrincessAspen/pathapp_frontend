@@ -7,7 +7,7 @@ const MainPage = () => {
     useEffect(() => {
         const fetchCharacter = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/character/1`); // Replace with the actual character ID
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/character/${characterId}`); // Replace with the actual character ID
                 const data = await response.json();
                 setCharacter(data);
             } catch (error) {
