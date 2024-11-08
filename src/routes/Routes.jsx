@@ -5,10 +5,13 @@ import Inventory from './Inventory';
 import Login, { action as loginAction } from './Login';
 import MainPage from './MainPage';  // Now a dedicated character overview page
 import Registration, { action as registrationAction } from './Registration';
+import Combat from './Combat'
+import Spellcasting from './Spellcasting'
 // import Spellcasting from './Spellcasting';
 import Layout from '../pages/Layout';
 import ProtectedLayout from '../pages/ProtectedLayout';
 import ErrorPage from '../pages/Error';
+import CharacterCreationPage from './Creation';
 
 const Routes = () => {
     const publicRoutes = [
@@ -24,18 +27,18 @@ const Routes = () => {
                     path: "/main",
                     element: <MainPage />  // Dedicated character overview page
                 },
-                // {
-                //     path: "/combat",
-                //     element: <Combat />    // Combat statistics like AC, CMB, etc.
-                // },
+                {
+                    path: "/combat",
+                    element: <Combat />    // Combat statistics like AC, CMB, etc.
+                },
                 {
                     path: "/inventory",
                     element: <Inventory /> // Equipment and money
                 },
-                // {
-                //     path: "/spellcasting",
-                //     element: <Spellcasting />  // Spellcasting page
-                // },
+                {
+                    path: "/spellcasting",
+                    element: <Spellcasting />  // Spellcasting page
+                },
                 {
                     path: '/registration',
                     element: <Registration />,
@@ -45,6 +48,10 @@ const Routes = () => {
                     path: '/login',
                     element: <Login />,
                     action: loginAction
+                },
+                {
+                    path: '/creation',
+                    element: <CharacterCreationPage />
                 }
             ]
         }
