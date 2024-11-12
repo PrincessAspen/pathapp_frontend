@@ -8,10 +8,10 @@ const CharacterCreationPage = () => {
     const [feats, setFeats] = useState([]);
     const [tempData, setTempData] = useState({
         stats: {},
-        skills: {},
+        skills: {}, // Initialize skills as an empty object
         feats: [],
         raceId: null,
-        classId: 0, // Start with an empty string for classId
+        classId: 0,
         level: 1,
         skillPoints: 0,
         availableSkillPoints: 0,
@@ -65,7 +65,6 @@ const CharacterCreationPage = () => {
         return response.json();
     };
 
-    // Function to roll 4d6 and drop the lowest die
     const rollStats = () => {
         const rolledStats = ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"];
         const rolledValues = {};
@@ -88,13 +87,14 @@ const CharacterCreationPage = () => {
             });
         }
 
+        console.log('Rolled Stats:', rolledValues);
+
         setTempData(prev => ({
             ...prev,
             stats: rolledValues
         }));
     };
 
-    // Handle stat changes
     const handleStatChange = (statId, newValue) => {
         setTempData(prev => ({
             ...prev,
@@ -105,56 +105,124 @@ const CharacterCreationPage = () => {
         }));
     };
 
-    // Handle level change and recalculate skill points
     const handleLevelChange = (newLevel) => {
         setTempData(prev => {
+            // Ensure selectedClass exists
             const selectedClass = classes.find(cls => cls.id === prev.classId);
-            const statModifier = prev.stats['Intelligence'] || 0;
-            const skillPoints = (selectedClass.skillPoints + statModifier) * newLevel;
+
+            if (!selectedClass) {
+                alert('Please select a class before updating the level');
+                return prev; // Don't update skill points if no class is selected
+            }
+
+            const statModifier = Math.floor((prev.stats['Intelligence'] - 10) / 2) || 0;
+            const skillPoints = (selectedClass.skill_points + statModifier) * newLevel;
+
+            console.log('Level Changed:', newLevel);
+            console.log('Stat Modifier (Intelligence):', statModifier);
+            console.log('Skill Points from Class and Stats:', skillPoints);
 
             return {
                 ...prev,
                 level: newLevel,
-                availableSkillPoints: skillPoints,
+                availableSkillPoints: skillPoints || 0, // Update skill points based on class and level
             };
         });
     };
 
-    // Handle class change and recalculate skill points
     const handleClassChange = (e) => {
-        const classId = e.target.value;
+        const classId = Number(e.target.value);
         const selectedClass = classes.find(cls => cls.id === classId);
-        
+        console.log(selectedClass)
+    
         if (!selectedClass) return;
-
-        const statModifier = tempData.stats['Intelligence'] || 0;
-        const skillPoints = (selectedClass.skillPoints + statModifier) * tempData.level;
-
+    
+        const statModifier = Math.floor((tempData.stats['Intelligence']-10)/2) || 0;
+    
+        // Use the correct property name 'skill_points' here
+        const skillPoints = selectedClass.skill_points || 0;  // Use 'skill_points' instead of 'skillPoints'
+    
+        const skillPointsValue = (skillPoints + statModifier) * tempData.level;
+    
+        console.log('Skill Points:', skillPoints); // Check if this is valid
+        console.log('Skill Points Calculation:', skillPointsValue);
+    
+        // Initialize skills to 0
+        const initialSkills = {};
+        if (selectedClass.skills) {
+            selectedClass.skills.forEach(skill => {
+                initialSkills[skill.id] = 0; // Initialize each skill to 0
+            });
+        }
+    
         setTempData(prev => ({
             ...prev,
-            classId,  // Update classId directly from the select input
-            availableSkillPoints: skillPoints,
+            classId: classId,
+            skills: initialSkills,
+            availableSkillPoints: skillPointsValue,
         }));
     };
+    
 
-    // Handle rank assignment for skills
     const handleSkillRankChange = (skillId, newRank) => {
-        const selectedSkill = skills.find(skill => skill.id === skillId);
         const maxRank = Math.min(newRank, tempData.level);
 
+        console.log('Changing Rank for Skill:', skillId, 'New Rank:', newRank);
+        console.log('Max Rank allowed:', maxRank);
+
+        // Ensure valid rank
         if (tempData.availableSkillPoints > 0 && newRank <= maxRank) {
             setTempData(prev => ({
                 ...prev,
                 skills: {
                     ...prev.skills,
-                    [skillId]: newRank
+                    [skillId]: newRank, // Update the skill rank correctly
                 },
                 availableSkillPoints: prev.availableSkillPoints - newRank,
             }));
         }
     };
 
-    // Save Character data (mocking backend call)
+    // Calculate the final value for the skill based on rank, stat modifier, and class skill bonus
+    const getSkillFinalValue = (skillId) => {
+        const rank = tempData.skills[skillId] || 0;
+        const skill = skills.find(skill => skill.id === skillId);
+    
+        // Ensure the skill has a valid modifying stat ID
+        if (!skill || !skill.modifying_stat_id) {
+            console.error('Invalid skill or missing modifying stat ID:', skill);
+            return 0;
+        }
+    
+        // Look up the stat name in tempData.stats
+        const statValue = stats[skill.modifying_stat_id];
+
+        console.log(statValue)
+
+        const trueStatValue = tempData.stats[statValue];
+
+        console.log(trueStatValue);
+        
+        // If stat exists, calculate modifier; otherwise, use 0
+        const statModifier = trueStatValue !== undefined
+            ? Math.floor((trueStatValue - 10) / 2) // Calculate the modifier for the stat
+            : 0;
+    
+        // Check if the skill is a class skill (listed in class_skills)
+        const isClassSkill = classes.find(cls => cls.id === tempData.classId)?.class_skills?.includes(skill.name);
+    
+        // Add the class skill bonus only if rank >= 1
+        const classBonus = (rank >= 1 && isClassSkill) ? 3 : 0;
+    
+        // Final value is the sum of rank, stat modifier, and class bonus
+        const finalValue = rank + statModifier + classBonus;
+    
+        return finalValue;
+    };
+    
+    
+
+
     const handleSave = async () => {
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/characters/`, {
@@ -170,7 +238,7 @@ const CharacterCreationPage = () => {
                     skills: {},
                     feats: [],
                     raceId: null,
-                    classId: 0,  // Reset classId to empty string
+                    classId: 0,
                     level: 1,
                     skillPoints: 0,
                     availableSkillPoints: 0,
@@ -211,7 +279,7 @@ const CharacterCreationPage = () => {
             <div>
                 <h2>Class</h2>
                 <select
-                    value={tempData.classId} // Ensure classId is set correctly here
+                    value={tempData.classId}
                     onChange={handleClassChange}
                 >
                     <option value="">Select Class</option>
@@ -273,7 +341,7 @@ const CharacterCreationPage = () => {
                             onChange={(e) => handleSkillRankChange(skill.id, parseInt(e.target.value))}
                         />
                         <span>
-                            Final Value: {tempData.skills[skill.id] + (tempData.stats[skill.modifying_stat_id] || 0)}
+                            Final Value: {getSkillFinalValue(skill.id)}
                         </span>
                     </div>
                 ))}
