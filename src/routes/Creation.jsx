@@ -15,6 +15,7 @@ const CharacterCreationPage = () => {
         level: 1,
         skillPoints: 0,
         availableSkillPoints: 0,
+        featCount: 0,
     });
 
     useEffect(() => {
@@ -133,35 +134,39 @@ const CharacterCreationPage = () => {
     const handleClassChange = (e) => {
         const classId = Number(e.target.value);
         const selectedClass = classes.find(cls => cls.id === classId);
-        console.log(selectedClass)
-    
+
         if (!selectedClass) return;
-    
+
         const statModifier = Math.floor((tempData.stats['Intelligence']-10)/2) || 0;
-    
-        // Use the correct property name 'skill_points' here
         const skillPoints = selectedClass.skill_points || 0;  // Use 'skill_points' instead of 'skillPoints'
-    
         const skillPointsValue = (skillPoints + statModifier) * tempData.level;
-    
-        console.log('Skill Points:', skillPoints); // Check if this is valid
-        console.log('Skill Points Calculation:', skillPointsValue);
-    
-        // Initialize skills to 0
-        const initialSkills = {};
-        if (selectedClass.skills) {
-            selectedClass.skills.forEach(skill => {
-                initialSkills[skill.id] = 0; // Initialize each skill to 0
-            });
+
+        console.log("RACE:", tempData.raceId)
+        console.log("CLASS:", selectedClass.name)
+
+        // Check for bonus feats based on class and race
+        let featBonus = 0;
+        if (Number(tempData.raceId) === 1) {
+            featBonus += 1; // Human race gets +1 feat
         }
-    
+
+        if (selectedClass.name === "Fighter") {
+            featBonus += 1; // Fighter class gets +1 feat
+        }
+
+        const initialFeats = []; // Initialize feats as an empty array for now
+        const availableFeats = 1 + featBonus; // 1 feat + bonuses
+
         setTempData(prev => ({
             ...prev,
             classId: classId,
-            skills: initialSkills,
+            feats: initialFeats,
             availableSkillPoints: skillPointsValue,
+            featCount: availableFeats, // Set feat count based on class and race
         }));
     };
+
+    
     
 
     const handleSkillRankChange = (skillId, newRank) => {
@@ -195,7 +200,7 @@ const CharacterCreationPage = () => {
         }
     
         // Look up the stat name in tempData.stats
-        const statValue = stats[skill.modifying_stat_id];
+        const statValue = stats[skill.modifying_stat_id]?.name;
 
         console.log(statValue)
 
@@ -220,7 +225,16 @@ const CharacterCreationPage = () => {
         return finalValue;
     };
     
-    
+    const handleFeatSelection = (featId) => {
+        if (tempData.featCount <= 0) return; // Don't allow selection if no feats are available
+
+        // Add the selected feat and decrease feat count
+        setTempData(prev => ({
+            ...prev,
+            feats: [...prev.feats, featId],
+            featCount: prev.featCount - 1, // Decrease available feats by 1
+        }));
+    };
 
 
     const handleSave = async () => {
@@ -349,24 +363,19 @@ const CharacterCreationPage = () => {
 
             {/* Feats Section */}
             <div>
+                <h2>Available Feats: {tempData.featCount}</h2>
                 <h2>Feats</h2>
-                <ul>
-                    {feats.map((feat) => (
-                        <li key={feat.id}>
-                            <input
-                                type="checkbox"
-                                checked={tempData.feats.includes(feat.id)}
-                                onChange={() => {
-                                    const newFeats = tempData.feats.includes(feat.id)
-                                        ? tempData.feats.filter(f => f !== feat.id)
-                                        : [...tempData.feats, feat.id];
-                                    setTempData({ ...tempData, feats: newFeats });
-                                }}
-                            />
-                            {feat.name}
-                        </li>
-                    ))}
-                </ul>
+                {feats.map((feat) => (
+                    <div key={feat.id}>
+                        <label>{feat.name}</label>
+                        <input
+                            type="checkbox"
+                            checked={tempData.feats.includes(feat.id)}
+                            onChange={() => handleFeatSelection(feat.id)}
+                            disabled={tempData.featCount <= 0} // Disable if no feats are available
+                        />
+                    </div>
+                ))}
             </div>
 
             {/* Save Character */}
