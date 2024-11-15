@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useCharacter } from '../CharacterContext';
 
 const CharacterCreationPage = () => {
+    const { updateCharacter, saveCharacter } = useCharacter();
     const [classes, setClasses] = useState([]);
     const [races, setRaces] = useState([]);
     const [skills, setSkills] = useState([]);
@@ -8,7 +10,7 @@ const CharacterCreationPage = () => {
     const [feats, setFeats] = useState([]);
     const [tempData, setTempData] = useState({
         stats: {},
-        skills: {}, // Initialize skills as an empty object
+        skills: {},
         feats: [],
         raceId: null,
         classId: 0,
@@ -236,33 +238,21 @@ const CharacterCreationPage = () => {
         }));
     };
 
+    const handleConfirm = () => {
+        // Update character context with the current values from tempData
+        updateCharacter('name', tempData.name || '');
+        updateCharacter('level', tempData.level || 1);
+        updateCharacter('characterClassId', tempData.classId || null);
+        updateCharacter('feats', [...tempData.feats]);
+        updateCharacter('stats', { ...tempData.stats });
+        updateCharacter('skills', { ...tempData.skills });
+        alert('Character confirmed!');
+    };
 
-    const handleSave = async () => {
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/characters/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(tempData),
-            });
 
-            if (response.ok) {
-                alert('Character saved successfully!');
-                setTempData({
-                    stats: {},
-                    skills: {},
-                    feats: [],
-                    raceId: null,
-                    classId: 0,
-                    level: 1,
-                    skillPoints: 0,
-                    availableSkillPoints: 0,
-                });
-            } else {
-                alert('Failed to save character');
-            }
-        } catch (error) {
-            console.error('Error saving character:', error);
-        }
+    const handleSave = () => {
+        // Call the saveCharacter function from context to handle the save process
+        saveCharacter();
     };
 
     if (!stats || !skills || !feats || !classes) {
@@ -379,6 +369,7 @@ const CharacterCreationPage = () => {
             </div>
 
             {/* Save Character */}
+            <button onClick={handleConfirm}>Confirm Character</button>
             <button onClick={handleSave}>Save Character</button>
         </div>
     );
