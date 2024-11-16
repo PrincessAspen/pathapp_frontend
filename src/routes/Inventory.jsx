@@ -34,18 +34,7 @@ const Inventory = () => {
                     <li>Placeholder 2</li>
                 </ul>
             </div>
-            <div>
-                <h1>Fortitude:</h1>
-                <h1>Reflex:</h1>
-                <h1>Will:</h1>
-            </div>
-            <div>
-                <h1>Base Speed:</h1>
-                <h3>Swim Speed:</h3>
-                <h3>Climb Speed:</h3>
-                <h3>Fly Speed:</h3>
-                <h3>Burrow Speed:</h3>
-            </div>
+            
         </div>
   );
 };

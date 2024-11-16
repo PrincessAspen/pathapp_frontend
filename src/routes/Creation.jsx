@@ -2,15 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useCharacter } from '../CharacterContext';
 
 const CharacterCreationPage = () => {
-    const { updateCharacter, saveCharacter } = useCharacter();
+    const { character, updateCharacter, saveCharacter } = useCharacter();
     const [classes, setClasses] = useState([]);
     const [races, setRaces] = useState([]);
+    const [alignments, setAlignments] = useState([]);
     const [skills, setSkills] = useState([]);
     const [stats, setStats] = useState([]);
     const [feats, setFeats] = useState([]);
     const [tempData, setTempData] = useState({
+        name: "",
         stats: {},
         skills: {},
+        alignmentId: null,
         feats: [],
         raceId: null,
         classId: 0,
@@ -23,18 +26,20 @@ const CharacterCreationPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [classRes, raceRes, statRes, skillRes, featRes] = await Promise.all([
+                const [classRes, raceRes, statRes, skillRes, featRes, alignmentRes] = await Promise.all([
                     fetchClasses(),
                     fetchRaces(),
                     fetchStats(),
                     fetchSkills(),
                     fetchFeats(),
+                    fetchAlignments(),
                 ]);
                 setClasses(classRes);
                 setRaces(raceRes);
                 setStats(statRes);
                 setSkills(skillRes);
                 setFeats(featRes);
+                setAlignments(alignmentRes)
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -66,6 +71,27 @@ const CharacterCreationPage = () => {
     const fetchFeats = async () => {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/feats/`);
         return response.json();
+    };
+
+    const fetchAlignments = async () => {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/alignments/`);
+        return response.json();  // Assuming there's an endpoint for alignments
+    };
+
+    const handleAlignmentChange = (e) => {
+        const newAlignmentId = e.target.value;
+        setTempData(prev => ({
+            ...prev,
+            alignmentId: newAlignmentId, // Update alignment in tempData
+        }));
+    };
+
+    const handleNameChange = (e) => {
+        const newName = e.target.value;
+        setTempData(prev => ({
+            ...prev,
+            name: newName, // Update name in tempData
+        }));
     };
 
     const rollStats = () => {
@@ -239,10 +265,10 @@ const CharacterCreationPage = () => {
     };
 
     const handleConfirm = () => {
-        // Update character context with the current values from tempData
         updateCharacter('name', tempData.name || '');
         updateCharacter('level', tempData.level || 1);
         updateCharacter('characterClassId', tempData.classId || null);
+        updateCharacter('alignmentId', tempData.alignmentId || null); // Update alignmentId in context
         updateCharacter('feats', [...tempData.feats]);
         updateCharacter('stats', { ...tempData.stats });
         updateCharacter('skills', { ...tempData.skills });
@@ -263,6 +289,33 @@ const CharacterCreationPage = () => {
         <div>
             <h1>Character Creation</h1>
 
+            {/* Character Name Input */}
+            <div>
+                <h2>Character Name</h2>
+                <input
+                    type="text"
+                    value={tempData.name}  // Bind name input to tempData state
+                    onChange={handleNameChange}
+                    placeholder="Enter your character's name"
+                />
+            </div>
+
+            {/* Alignment Selection */}
+            <div>
+                <h2>Alignment</h2>
+                <select
+                    value={tempData.alignmentId || ''}
+                    onChange={handleAlignmentChange}
+                >
+                    <option value="">Select Alignment</option>
+                    {alignments.map((alignment) => (
+                        <option key={alignment.id} value={alignment.id}>
+                            {alignment.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
             {/* Race Selection */}
             <div>
                 <h2>Race</h2>
@@ -277,6 +330,26 @@ const CharacterCreationPage = () => {
                         </option>
                     ))}
                 </select>
+            </div>
+
+            {/* Stats Display */}
+            <div>
+                <h2>Stats</h2>
+                {Object.keys(tempData.stats).length === 0 ? (
+                    <p>No stats rolled yet</p>
+                ) : (
+                    Object.keys(tempData.stats).map((stat) => (
+                        <div key={stat}>
+                            <label>{stat}:</label>
+                            <input
+                                type="number"
+                                value={tempData.stats[stat] || 0}
+                                onChange={(e) => handleStatChange(stat, parseInt(e.target.value))}
+                            />
+                        </div>
+                    ))
+                )}
+                <button onClick={rollStats}>Roll Stats</button>
             </div>
 
             {/* Class Selection */}
@@ -304,26 +377,6 @@ const CharacterCreationPage = () => {
                     value={tempData.level}
                     onChange={(e) => handleLevelChange(parseInt(e.target.value))}
                 />
-            </div>
-
-            {/* Stats Display */}
-            <div>
-                <h2>Stats</h2>
-                {Object.keys(tempData.stats).length === 0 ? (
-                    <p>No stats rolled yet</p>
-                ) : (
-                    Object.keys(tempData.stats).map((stat) => (
-                        <div key={stat}>
-                            <label>{stat}:</label>
-                            <input
-                                type="number"
-                                value={tempData.stats[stat] || 0}
-                                onChange={(e) => handleStatChange(stat, parseInt(e.target.value))}
-                            />
-                        </div>
-                    ))
-                )}
-                <button onClick={rollStats}>Roll Stats</button>
             </div>
 
             {/* Skill Points Display */}
