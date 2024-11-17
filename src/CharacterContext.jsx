@@ -45,7 +45,7 @@ export const CharacterProvider = ({ children }) => {
             setTimeout(fetchUserCharacters, 500);  // Try again in 500ms
             return;
         }
-    
+        
         setLoading(true);
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/characters/`, {
@@ -58,6 +58,9 @@ export const CharacterProvider = ({ children }) => {
             if (response.ok) {
                 const data = await response.json();
                 setUserCharacters(data); // Update the state with the fetched characters
+                if (data.length > 0) {
+                    setCharacter(data[0]);  // Set the first character as the current character if any exist
+                }
             } else {
                 console.error('Failed to fetch characters');
             }
@@ -66,12 +69,12 @@ export const CharacterProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-        console.log('Token:', token);
-
     };
+    
     
 
     const updateCharacter = (key, value) => {
+        console.log(`Updating character's ${key} to ${value}`);
         setCharacter((prevCharacter) => ({
             ...prevCharacter,
             [key]: value,

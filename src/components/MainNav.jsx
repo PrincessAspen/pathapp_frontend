@@ -4,7 +4,7 @@ import { useCharacter } from '../CharacterContext';
 
 const MainNav = () => {
     const { user, token, logout } = useAuth();
-    const { character } = useCharacter();
+    const { character, userCharacters } = useCharacter();
     const navigate = useNavigate();
 
     const handleLogout = async () => {
@@ -14,7 +14,7 @@ const MainNav = () => {
         }
     };
 
-    const characterExists = character.name && character.level > 0;
+    const characterExists = character && character.name && character.level > 0;
 
     return (
         <nav>
@@ -24,17 +24,18 @@ const MainNav = () => {
                 </li>
                 {characterExists ? (
                     <>
+                        {/* Update the paths to use character.id */}
                         <li>
-                            <NavLink to="/main">Character Overview</NavLink>
+                            <NavLink to={`/main/${character.id}`}>Character Overview</NavLink>
                         </li>
                         <li>
-                            <NavLink to="/combat">Combat</NavLink>
+                            <NavLink to={`/combat/${character.id}`}>Combat</NavLink>
                         </li>
                         <li>
-                            <NavLink to="/inventory">Inventory</NavLink>
+                            <NavLink to={`/inventory/${character.id}`}>Inventory</NavLink>
                         </li>
                         <li>
-                            <NavLink to="/spellcasting">Spellcasting</NavLink>
+                            <NavLink to={`/spellcasting/${character.id}`}>Spellcasting</NavLink>
                         </li>
                     </>
                 ) : (

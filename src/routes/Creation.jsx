@@ -310,6 +310,7 @@ const CharacterCreationPage = () => {
         updateCharacter('feats', [...tempData.feats]);
         updateCharacter('stats', { ...tempData.stats });
         updateCharacter('skills', { ...tempData.skills });
+        updateCharacter('raceId', tempData.raceId || null);
         alert('Character confirmed!');
     };
 

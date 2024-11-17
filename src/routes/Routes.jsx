@@ -24,19 +24,19 @@ const Routes = () => {
                     element: <Home />  // Set Home as the main landing page
                 },
                 {
-                    path: "/main",
+                    path: "/main/:characterId",
                     element: <MainPage />  // Dedicated character overview page
                 },
                 {
-                    path: "/combat",
+                    path: "/combat/:characterId",
                     element: <Combat />    // Combat statistics like AC, CMB, etc.
                 },
                 {
-                    path: "/inventory",
+                    path: "/inventory/:characterId",
                     element: <Inventory /> // Equipment and money
                 },
                 {
-                    path: "/spellcasting",
+                    path: "/spellcasting/:characterId",
                     element: <Spellcasting />  // Spellcasting page
                 },
                 {
