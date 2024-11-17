@@ -13,9 +13,9 @@ const CharacterCreationPage = () => {
         name: "",
         stats: {},
         skills: {},
-        alignmentId: null,
+        alignmentId: 0,
         feats: [],
-        raceId: null,
+        raceId: 0,
         classId: 0,
         level: 1,
         skillPoints: 0,
@@ -45,8 +45,15 @@ const CharacterCreationPage = () => {
             }
         };
 
+        console.log("Alignments: ", alignments)
+
         fetchData();
     }, []);
+
+    // This useEffect hook will log the updated raceId whenever it changes
+    useEffect(() => {
+        console.log("Updated raceId:", tempData.raceId);
+    }, [tempData.raceId]); // This will trigger every time raceId changes
 
     const fetchClasses = async () => {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/character_classes/`);
@@ -76,6 +83,37 @@ const CharacterCreationPage = () => {
     const fetchAlignments = async () => {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/alignments/`);
         return response.json();  // Assuming there's an endpoint for alignments
+    };
+
+    const handleRaceChange = (e) => {
+        const selectedRaceId = e.target.value;
+        console.log("Selected Race ID:", selectedRaceId);  // Log the race ID when it's selected
+    
+        setTempData(prev => {
+            const updatedTempData = {
+                ...prev,
+                raceId: selectedRaceId,
+                stats: updateStatsWithRaceModifiers(prev.stats, selectedRaceId), // Apply race modifiers to stats
+            };
+            return updatedTempData;
+        });
+    
+        console.log("Updated tempData:", tempData);  // Log the updated state after race change
+    };
+
+    // Apply race-based stat modifiers to the stats
+    const updateStatsWithRaceModifiers = (currentStats, raceId) => {
+        const selectedRace = races.find(race => race.id === raceId);
+        if (!selectedRace || !selectedRace.stat_modifiers) return currentStats;
+
+        const updatedStats = { ...currentStats };
+        Object.keys(selectedRace.stat_modifiers).forEach(stat => {
+            if (updatedStats[stat] !== undefined) {
+                updatedStats[stat] += selectedRace.stat_modifiers[stat]; // Apply modifier
+            }
+        });
+
+        return updatedStats;
     };
 
     const handleAlignmentChange = (e) => {
@@ -116,7 +154,7 @@ const CharacterCreationPage = () => {
             });
         }
 
-        console.log('Rolled Stats:', rolledValues);
+        // console.log('Rolled Stats:', rolledValues);
 
         setTempData(prev => ({
             ...prev,
@@ -147,9 +185,9 @@ const CharacterCreationPage = () => {
             const statModifier = Math.floor((prev.stats['Intelligence'] - 10) / 2) || 0;
             const skillPoints = (selectedClass.skill_points + statModifier) * newLevel;
 
-            console.log('Level Changed:', newLevel);
-            console.log('Stat Modifier (Intelligence):', statModifier);
-            console.log('Skill Points from Class and Stats:', skillPoints);
+            // console.log('Level Changed:', newLevel);
+            // console.log('Stat Modifier (Intelligence):', statModifier);
+            // console.log('Skill Points from Class and Stats:', skillPoints);
 
             return {
                 ...prev,
@@ -200,8 +238,8 @@ const CharacterCreationPage = () => {
     const handleSkillRankChange = (skillId, newRank) => {
         const maxRank = Math.min(newRank, tempData.level);
 
-        console.log('Changing Rank for Skill:', skillId, 'New Rank:', newRank);
-        console.log('Max Rank allowed:', maxRank);
+        // console.log('Changing Rank for Skill:', skillId, 'New Rank:', newRank);
+        // console.log('Max Rank allowed:', maxRank);
 
         // Ensure valid rank
         if (tempData.availableSkillPoints > 0 && newRank <= maxRank) {
@@ -230,11 +268,11 @@ const CharacterCreationPage = () => {
         // Look up the stat name in tempData.stats
         const statValue = stats[skill.modifying_stat_id]?.name;
 
-        console.log(statValue)
+        // console.log(statValue)
 
         const trueStatValue = tempData.stats[statValue];
 
-        console.log(trueStatValue);
+        // console.log(trueStatValue);
         
         // If stat exists, calculate modifier; otherwise, use 0
         const statModifier = trueStatValue !== undefined
@@ -321,10 +359,10 @@ const CharacterCreationPage = () => {
                 <h2>Race</h2>
                 <select
                     value={tempData.raceId || ''}
-                    onChange={(e) => setTempData({ ...tempData, raceId: e.target.value })}
+                    onChange={handleRaceChange}
                 >
                     <option value="">Select Race</option>
-                    {races.map(race => (
+                    {races.map((race) => (
                         <option key={race.id} value={race.id}>
                             {race.name}
                         </option>
