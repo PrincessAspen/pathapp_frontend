@@ -1,3 +1,4 @@
+import './index.css';
 import Routes from './routes/Routes'
 import AuthProvider from './AuthContext'
 import CharacterProvider from './CharacterContext'

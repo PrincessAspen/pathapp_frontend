@@ -7,19 +7,15 @@ const Home = () => {
     const [raceNames, setRaceNames] = useState({});   // Store the race names by race ID
 
     useEffect(() => {
-        // If needed, fetch characters again when component mounts
         if (!userCharacters.length) {
             fetchUserCharacters();
         }
     }, [userCharacters]);
 
     useEffect(() => {
-        // Fetch class names based on character_class_id
         const fetchClassNames = async () => {
             try {
                 const classNamesObj = {};
-
-                // Loop through each character and fetch class name using class_id
                 for (const character of userCharacters) {
                     if (character.character_class_id && !classNamesObj[character.character_class_id]) {
                         const classResponse = await fetch(`${import.meta.env.VITE_API_URL}/character_classes/${character.character_class_id}`);
@@ -29,19 +25,15 @@ const Home = () => {
                         }
                     }
                 }
-
                 setClassNames(classNamesObj);
             } catch (err) {
                 console.error("Error fetching class names:", err);
             }
         };
 
-        // Fetch race names based on race_id
         const fetchRaceNames = async () => {
             try {
                 const raceNamesObj = {};
-
-                // Loop through each character and fetch race name using race_id
                 for (const character of userCharacters) {
                     if (character.race_id && !raceNamesObj[character.race_id]) {
                         const raceResponse = await fetch(`${import.meta.env.VITE_API_URL}/races/${character.race_id}`);
@@ -51,7 +43,6 @@ const Home = () => {
                         }
                     }
                 }
-
                 setRaceNames(raceNamesObj);
             } catch (err) {
                 console.error("Error fetching race names:", err);
@@ -59,8 +50,8 @@ const Home = () => {
         };
 
         if (userCharacters.length > 0) {
-            fetchClassNames();  // Fetch class names only if we have characters
-            fetchRaceNames();   // Fetch race names only if we have characters
+            fetchClassNames();
+            fetchRaceNames();
         }
     }, [userCharacters]);
 
@@ -78,24 +69,36 @@ const Home = () => {
     };
 
     if (loading) {
-        return <h2>Loading character data...</h2>;
+        return <h2 className="text-xl text-center text-gray-500">Loading character data...</h2>;
     }
 
     return (
-        <div>
-            <h1>Your Characters</h1>
+        <div className="min-h-screen bg-gray-100 p-6">
+            <h1 className="text-4xl font-bold text-center text-indigo-600 mb-8">Your Characters</h1>
             {userCharacters.length === 0 ? (
-                <h2>No characters found.</h2>
+                <h2 className="text-2xl text-center text-gray-600">No characters found.</h2>
             ) : (
-                <ul>
+                <ul className="space-y-6">
                     {userCharacters.map((character) => (
-                        <li key={character.id}>
-                            <h3>{character.name}</h3>
-                            <p>Level: {character.level}</p>
-                            <p>Race: {raceNames[character.race_id] || 'N/A'}</p>  {/* Display race name */}
-                            <p>Class: {classNames[character.character_class_id] || 'N/A'}</p>  {/* Display class name */}
-                            <button onClick={() => handleViewCharacter(character)}>View</button>
-                            <button onClick={() => deleteCharacter(character.id)}>Delete</button>
+                        <li key={character.id} className="bg-white shadow-md rounded-lg p-6">
+                            <h3 className="text-2xl font-semibold text-gray-800">{character.name}</h3>
+                            <p className="text-gray-600">Level: {character.level}</p>
+                            <p className="text-gray-600">Race: {raceNames[character.race_id] || 'N/A'}</p>
+                            <p className="text-gray-600">Class: {classNames[character.character_class_id] || 'N/A'}</p>
+                            <div className="mt-4 flex space-x-4">
+                                <button 
+                                    onClick={() => handleViewCharacter(character)} 
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                >
+                                    View
+                                </button>
+                                <button 
+                                    onClick={() => deleteCharacter(character.id)} 
+                                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300"
+                                >
+                                    Delete
+                                </button>
+                            </div>
                         </li>
                     ))}
                 </ul>

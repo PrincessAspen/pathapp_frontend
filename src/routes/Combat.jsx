@@ -7,7 +7,7 @@ const Combat = () => {
     const { character } = useCharacter();
     const [combatData, setCombatData] = useState(null);
     const [classData, setClassData] = useState(null);
-    const [babProgressionData, setBabProgressionData] = useState(null); // To store BAB data
+    const [babProgressionData, setBabProgressionData] = useState(null);
     const [weapons, setWeapons] = useState([]);
     const [armor, setArmor] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -16,12 +16,10 @@ const Combat = () => {
     useEffect(() => {
         const fetchCombatData = async () => {
             try {
-                // Check if character is loaded from context, if so, no need to fetch again
                 if (!character || !character.characterClassId) {
                     throw new Error('Character or class not found');
                 }
 
-                // Fetch class details using character's class_id
                 const classResponse = await fetch(`${import.meta.env.VITE_API_URL}/character_classes/${character.characterClassId}`);
                 if (!classResponse.ok) {
                     throw new Error('Failed to fetch class data');
@@ -29,15 +27,13 @@ const Combat = () => {
                 const classDetails = await classResponse.json();
                 setClassData(classDetails);
 
-                // Fetch BAB progression details from bab_progressions table using bab_progression from class
-                const babResponse = await fetch(`${import.meta.env.VITE_API_URL}/bab_progressions/2`); // BAB Progression ID is 2 for level 1
+                const babResponse = await fetch(`${import.meta.env.VITE_API_URL}/bab_progressions/2`);
                 if (!babResponse.ok) {
                     throw new Error('Failed to fetch BAB progression data');
                 }
                 const babDetails = await babResponse.json();
                 setBabProgressionData(babDetails);
 
-                // Fetch weapons and armor based on starting equipment from the class
                 const weaponsData = await Promise.all(
                     classDetails.starting_weapons.map((weaponName) =>
                         fetch(`${import.meta.env.VITE_API_URL}/weapons?name=${weaponName}`)
@@ -49,15 +45,12 @@ const Combat = () => {
                     )
                 );
 
-                // Process the fetched data
                 const weaponsJson = await Promise.all(weaponsData.map(res => res.json()));
                 const armorJson = await Promise.all(armorData.map(res => res.json()));
 
-                // Flatten and filter weapons and armor based on starting equipment
                 const filteredWeapons = weaponsJson.flat().filter(weapon => classDetails.starting_weapons.includes(weapon.name));
                 const filteredArmor = armorJson.flat().filter(armorItem => classDetails.starting_armor.includes(armorItem.name));
 
-                // Remove duplicates using reduce
                 const uniqueWeapons = filteredWeapons.reduce((acc, weapon) => {
                     if (!acc.some(existingWeapon => existingWeapon.name === weapon.name)) {
                         acc.push(weapon);
@@ -72,36 +65,39 @@ const Combat = () => {
                     return acc;
                 }, []);
 
-                setWeapons(uniqueWeapons);  // Set filtered unique weapons
-                setArmor(uniqueArmor);  // Set filtered unique armor
+                setWeapons(uniqueWeapons);
+                setArmor(uniqueArmor);
 
-                // Calculate combat data based on character's stats and class
                 const constitution = character.stats?.Constitution || 10;
-                const hitDie = classDetails.hit_die || 6;  // Default hit die if not found
-                const conModifier = Math.floor((constitution - 10) / 2); // Calculate constitution modifier
-                const hitPoints = hitDie + conModifier; // HP = HD + CON modifier
+                const strength = character.stats?.Strength || 10;  // Strength value
+                const dexterity = character.stats?.Dexterity || 10;  // Dexterity value
+                const hitDie = classDetails.hit_die || 6;
+                const conModifier = Math.floor((constitution - 10) / 2);
+                const hitPoints = hitDie + conModifier;
 
-                const armorClass = 10 + conModifier;  // Basic AC formula, modify as needed based on equipment and stats
+                const armorClass = 10 + conModifier;
+                const babProgression = babDetails ? babDetails[classDetails.bab_progression] : 0; // Ensure correct BAB
+                const attackBonus = babProgression;
 
-                // Check babProgressionData to pull the value for the BAB
-                const babProgression = babProgressionData ? babProgressionData[classDetails.bab_progression] : 0;  // Default to 0 if not found
-                const attackBonus = babProgression;  // Adjust this based on class features, etc.
+                // Calculate Melee and Ranged Attack Bonuses
+                const meleeAttackBonus = attackBonus + Math.floor((strength - 10) / 2);  // Melee uses Strength modifier
+                const rangedAttackBonus = attackBonus + Math.floor((dexterity - 10) / 2);  // Ranged uses Dexterity modifier
 
-                // Set calculated combat stats
                 setCombatData({
                     hit_points: hitPoints,
                     armor_class: armorClass,
                     attack_bonus: attackBonus,
-                    damage: "1d8", // Modify based on weapon class/attack
-                    fortitude_save: conModifier,  // Example, modify based on character class and stats
-                    reflex_save: Math.floor((character.stats?.Dexterity || 10 - 10) / 2), // Modify as needed
-                    will_save: Math.floor((character.stats?.Wisdom || 10 - 10) / 2), // Modify as needed
-                    touch_ac: armorClass - 2,  // For example, some modification logic
-                    flat_footed_ac: armorClass - 4, // Example
-                    movement_speed: "30 ft",  // Example
-                    speeds: [{ type: 'Run', value: 90 }, {type: "Crawl", value: 5}]
+                    melee_attack_bonus: meleeAttackBonus,
+                    ranged_attack_bonus: rangedAttackBonus,
+                    damage: "1d8",
+                    fortitude_save: conModifier,
+                    reflex_save: Math.floor((character.stats?.Dexterity || 10 - 10) / 2),
+                    will_save: Math.floor((character.stats?.Wisdom || 10 - 10) / 2),
+                    touch_ac: armorClass - 2,
+                    flat_footed_ac: armorClass - 4,
+                    movement_speed: "30 ft",
+                    speeds: [{ type: 'Run', value: 90 }, { type: "Crawl", value: 5 }]
                 });
-
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -110,78 +106,97 @@ const Combat = () => {
         };
 
         fetchCombatData();
-
-    }, [characterId, character.characterClassId, character, babProgressionData]);  // Fetch based on context character and babProgressionData
+    }, [characterId, character.characterClassId, character]);
 
     if (loading) {
-        return <h2>Loading combat data...</h2>;
+        return <h2 className="text-center text-lg">Loading combat data...</h2>;
     }
 
     if (error) {
-        return <h2>Error: {error}</h2>;
+        return <h2 className="text-center text-red-600">Error: {error}</h2>;
     }
 
     return (
-        <div>
-            <h1>Combat Statistics</h1>
-            <div>
-                <h2>Hit Points:</h2>
-                <p>{combatData.hit_points}</p>
-            </div>
-            <div>
-                <h2>Armor Class:</h2>
-                <p>{combatData.armor_class}</p>
-                <h3>Touch AC:</h3>
-                <p>{combatData.touch_ac}</p>
-                <h3>Flat-Footed AC:</h3>
-                <p>{combatData.flat_footed_ac}</p>
-            </div>
-            <div>
-                <h2>Attack Bonus:</h2>
-                <p>{combatData.attack_bonus}</p>
-            </div>
-            <div>
-                <h2>Damage:</h2>
-                <p>{combatData.damage}</p>
-            </div>
-            <div>
-                <h2>Saving Throws:</h2>
+        <div className="container mx-auto px-6 py-8">
+            <h1 className="text-4xl font-bold mb-8 text-center">Combat Statistics</h1>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                    <h3>Fortitude:</h3>
-                    <p>{combatData.fortitude_save}</p>
+                    <h2 className="text-xl font-semibold mb-2">Hit Points:</h2>
+                    <p className="text-lg">{combatData.hit_points}</p>
                 </div>
+
                 <div>
-                    <h3>Reflex:</h3>
-                    <p>{combatData.reflex_save}</p>
+                    <h2 className="text-xl font-semibold mb-2">Armor Class:</h2>
+                    <p className="text-lg">{combatData.armor_class}</p>
+                    <h3 className="font-medium mt-2">Touch AC:</h3>
+                    <p>{combatData.touch_ac}</p>
+                    <h3 className="font-medium mt-2">Flat-Footed AC:</h3>
+                    <p>{combatData.flat_footed_ac}</p>
                 </div>
+
                 <div>
-                    <h3>Will:</h3>
-                    <p>{combatData.will_save}</p>
+                    <h2 className="text-xl font-semibold mb-2">Attack Bonus:</h2>
+                    <p className="text-lg">{combatData.attack_bonus}</p>
+                </div>
+
+                <div>
+                    <h2 className="text-xl font-semibold mb-2">Melee Attack Bonus:</h2>
+                    <p className="text-lg">{combatData.melee_attack_bonus}</p>
+                </div>
+
+                <div>
+                    <h2 className="text-xl font-semibold mb-2">Ranged Attack Bonus:</h2>
+                    <p className="text-lg">{combatData.ranged_attack_bonus}</p>
+                </div>
+
+                <div>
+                    <h2 className="text-xl font-semibold mb-2">Damage:</h2>
+                    <p className="text-lg">{combatData.damage}</p>
+                </div>
+
+                <div>
+                    <h2 className="text-xl font-semibold mb-2">Saving Throws:</h2>
+                    <div>
+                        <h3 className="font-medium">Fortitude:</h3>
+                        <p>{combatData.fortitude_save}</p>
+                    </div>
+                    <div>
+                        <h3 className="font-medium">Reflex:</h3>
+                        <p>{combatData.reflex_save}</p>
+                    </div>
+                    <div>
+                        <h3 className="font-medium">Will:</h3>
+                        <p>{combatData.will_save}</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 className="text-xl font-semibold mb-2">Movement Speed:</h2>
+                    <p className="text-lg">{combatData.movement_speed}</p>
+                    <h3 className="font-medium mt-2">Other Speeds:</h3>
+                    <ul className="list-disc pl-6">
+                        {combatData.speeds.map((speed) => (
+                            <li key={speed.type} className="text-lg">{`${speed.type}: ${speed.value} ft.`}</li>
+                        ))}
+                    </ul>
                 </div>
             </div>
-            <div>
-                <h2>Movement Speed:</h2>
-                <p>{combatData.movement_speed}</p>
-                <h3>Other Speeds:</h3>
-                <ul>
-                    {combatData.speeds && combatData.speeds.map((speed) => (
-                        <li key={speed.type}>{`${speed.type}: ${speed.value}`} ft.</li>
-                    ))}
-                </ul>
-            </div>
-            <div>
-                <h2>Starting Weapons:</h2>
-                <ul>
+
+            <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-2">Starting Weapons:</h2>
+                <ul className="list-disc pl-6">
                     {weapons.map((weapon) => (
-                        <li key={weapon.name}>{weapon.name} - {weapon.damage_dice} damage</li>
+                        <li key={weapon.name} className="text-lg">{weapon.name} - {weapon.damage_dice} damage</li>
                     ))}
                 </ul>
             </div>
-            <div>
-                <h2>Starting Armor:</h2>
-                <ul>
+
+            <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-2">Starting Armor:</h2>
+                <ul className="list-disc pl-6">
                     {armor.map((armorItem) => (
-                        <li key={armorItem.name}>{armorItem.name} - AC Bonus: {armorItem.armor_bonus}</li>
+                        <li key={armorItem.name} className="text-lg">{armorItem.name} - AC Bonus: {armorItem.armor_bonus}</li>
                     ))}
                 </ul>
             </div>
