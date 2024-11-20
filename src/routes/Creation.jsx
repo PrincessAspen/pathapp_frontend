@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCharacter } from '../CharacterContext';
+import d20Image from '../images/d20.png';
 
 const CharacterCreationPage = () => {
     const { character, updateCharacter, saveCharacter } = useCharacter();
@@ -232,9 +233,6 @@ const CharacterCreationPage = () => {
         }));
     };
 
-    
-    
-
     const handleSkillRankChange = (skillId, newRank) => {
         const maxRank = Math.min(newRank, tempData.level);
 
@@ -325,146 +323,140 @@ const CharacterCreationPage = () => {
     }
 
     return (
-        <div>
-            <h1>Character Creation</h1>
+    <div className="container mx-auto px-4 py-8 bg-artsy" >
+        <h1 className="text-3xl font-extrabold mb-6 text-center text-gray-800">Character Creation</h1>
 
-            {/* Character Name Input */}
-            <div>
-                <h2>Character Name</h2>
-                <input
-                    type="text"
-                    value={tempData.name}  // Bind name input to tempData state
-                    onChange={handleNameChange}
-                    placeholder="Enter your character's name"
-                />
-            </div>
+        {/* Character Name Input */}
+        <div className="mb-4">
+            <h2 className="text-xl font-extrabold mb-2 text-gray-800">Character Name</h2>
+            <input
+                type="text"
+                value={tempData.name}  // Bind name input to tempData state
+                onChange={handleNameChange}
+                placeholder="Enter your character's name"
+                className="w-full p-2 border border-gray-300 rounded"
+            />
+        </div>
 
-            {/* Alignment Selection */}
-            <div>
-                <h2>Alignment</h2>
-                <select
-                    value={tempData.alignmentId || ''}
-                    onChange={handleAlignmentChange}
-                >
-                    <option value="">Select Alignment</option>
-                    {alignments.map((alignment) => (
-                        <option key={alignment.id} value={alignment.id}>
-                            {alignment.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
+        {/* Alignment Selection */}
+        <div className="mb-4">
+            <h2 className="text-xl font-extrabold mb-2 text-gray-800">Alignment</h2>
+            <select
+                value={tempData.alignmentId || ''}
+                onChange={handleAlignmentChange}
+                className="w-full p-2 border border-gray-300 rounded"
+            >
+                <option value="">Select Alignment</option>
+                {alignments.map((alignment) => (
+                    <option key={alignment.id} value={alignment.id}>
+                        {alignment.name}
+                    </option>
+                ))}
+            </select>
+        </div>
 
-            {/* Race Selection */}
-            <div>
-                <h2>Race</h2>
-                <select
-                    value={tempData.raceId || ''}
-                    onChange={handleRaceChange}
-                >
-                    <option value="">Select Race</option>
-                    {races.map((race) => (
-                        <option key={race.id} value={race.id}>
-                            {race.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
+        {/* Race Selection */}
+        <div className="mb-4">
+            <h2 className="text-xl font-extrabold mb-2 text-gray-800">Race</h2>
+            <select
+                value={tempData.raceId || ''}
+                onChange={handleRaceChange}
+                className="w-full p-2 border border-gray-300 rounded"
+            >
+                <option value="">Select Race</option>
+                {races.map((race) => (
+                    <option key={race.id} value={race.id}>
+                        {race.name}
+                    </option>
+                ))}
+            </select>
+        </div>
 
-            {/* Stats Display */}
-            <div>
-                <h2>Stats</h2>
-                {Object.keys(tempData.stats).length === 0 ? (
-                    <p>No stats rolled yet</p>
-                ) : (
-                    Object.keys(tempData.stats).map((stat) => (
-                        <div key={stat}>
-                            <label>{stat}:</label>
-                            <input
-                                type="number"
-                                value={tempData.stats[stat] || 0}
-                                onChange={(e) => handleStatChange(stat, parseInt(e.target.value))}
-                            />
-                        </div>
-                    ))
-                )}
-                <button onClick={rollStats}>Roll Stats</button>
-            </div>
-
-            {/* Class Selection */}
-            <div>
-                <h2>Class</h2>
-                <select
-                    value={tempData.classId}
-                    onChange={handleClassChange}
-                >
-                    <option value="">Select Class</option>
-                    {classes.map(cls => (
-                        <option key={cls.id} value={cls.id}>
-                            {cls.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            {/* Level Selection */}
-            <div>
-                <h2>Level</h2>
-                <input
-                    type="number"
-                    min="1"
-                    value={tempData.level}
-                    onChange={(e) => handleLevelChange(parseInt(e.target.value))}
-                />
-            </div>
-
-            {/* Skill Points Display */}
-            <div>
-                <h2>Available Skill Points: {tempData.availableSkillPoints}</h2>
-            </div>
-
-            {/* Skills Section */}
-            <div>
-                <h2>Skills</h2>
-                {skills.map((skill) => (
-                    <div key={skill.id}>
-                        <label>{skill.name} (Associated Stat: {stats.find(stat => stat.id === skill.modifying_stat_id)?.name})</label>
+        {/* Stats Display */}
+        <div className="mb-4">
+            <h2 className="text-xl font-extrabold mb-2 text-gray-800">Stats</h2>
+            {Object.keys(tempData.stats).length === 0 ? (
+                <p className="text-gray-800 font-extrabold">No stats rolled yet</p>
+            ) : (
+                Object.keys(tempData.stats).map((stat) => (
+                    <div key={stat} className="mb-2">
+                        <label className="mr-2 text-gray-800 font-extrabold">{stat}:</label>
                         <input
                             type="number"
-                            min="0"
-                            max={tempData.level}
-                            value={tempData.skills[skill.id] || 0}
-                            onChange={(e) => handleSkillRankChange(skill.id, parseInt(e.target.value))}
+                            value={tempData.stats[stat] || 0}
+                            onChange={(e) => handleStatChange(stat, parseInt(e.target.value))}
+                            className="w-full p-2 border border-gray-300 rounded"
                         />
-                        <span>
-                            Final Value: {getSkillFinalValue(skill.id)}
-                        </span>
                     </div>
-                ))}
-            </div>
+                ))
+            )}
+            <button onClick={rollStats} className="px-4 py-2 bg-blue-500 text-white rounded mt-4 hover:bg-blue-600 flex items-center justify-center">
+                {/* Displaying the d20 image */}
+                <img src={d20Image} alt="Roll Stats" className="w-8 h-8" />
+            </button>
+        </div>
 
+        {/* Column Layout for Feats and Skills */}
+        <div className="flex space-x-12 mt-4">
             {/* Feats Section */}
-            <div>
-                <h2>Available Feats: {tempData.featCount}</h2>
-                <h2>Feats</h2>
+            <div className="flex-1">
+                <h2 className="text-xl font-extrabold mb-2 text-gray-800">Available Feats: {tempData.featCount}</h2>
+                <h2 className="text-xl font-extrabold mb-2 text-gray-800">Feats</h2>
                 {feats.map((feat) => (
-                    <div key={feat.id}>
-                        <label>{feat.name}</label>
+                    <div key={feat.id} className="mb-2">
+                        <label className="mr-2 text-gray-900 font-extrabold">{feat.name}</label>
                         <input
                             type="checkbox"
                             checked={tempData.feats.includes(feat.id)}
                             onChange={() => handleFeatSelection(feat.id)}
                             disabled={tempData.featCount <= 0} // Disable if no feats are available
+                            className="form-checkbox"
                         />
                     </div>
                 ))}
             </div>
 
-            {/* Save Character */}
-            <button onClick={handleConfirm}>Confirm Character</button>
-            <button onClick={handleSave}>Save Character</button>
+        {/* Skills Section */}
+        <div className="flex-1">
+            <h2 className="text-xl font-extrabold mb-2 text-gray-800">Skills</h2>
+            {skills.map((skill) => (
+                <div key={skill.id} className="mb-4">
+                    <label className="block text-gray-800 font-extrabold">{skill.name} (Associated Stat: {stats.find(stat => stat.id === skill.modifying_stat_id)?.name})</label>
+                    <input
+                        type="number"
+                        min="0"
+                        max={tempData.level}
+                        value={tempData.skills[skill.id] || 0}
+                        onChange={(e) => handleSkillRankChange(skill.id, parseInt(e.target.value))}
+                        className="w-full p-2 border border-gray-300 rounded"
+                    />
+                    <span className="block mt-1 text-gray-800 font-extrabold">
+                        Final Value: {getSkillFinalValue(skill.id)}
+                    </span>
+                </div>
+                ))}
         </div>
-    );
-};
+        </div>
+
+        {/* Save Character */}
+        <div className="mt-4 flex justify-between">
+            <button
+                onClick={handleConfirm}
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-extrabold"
+            >
+                Confirm Character
+            </button>
+            <button
+                onClick={handleSave}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 font-extrabold"
+            >
+                Save Character
+            </button>
+        </div>
+    </div>
+
+
+        );
+    };
 
 export default CharacterCreationPage;

@@ -32,7 +32,7 @@ export const action = async ({request}) => {
 
 const Registration = () => {
     return (
-        <div>
+        <div className="bg-artsy">
           <Form action="/registration" method="POST">
             <label>
               Enter your username

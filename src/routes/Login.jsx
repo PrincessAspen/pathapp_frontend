@@ -40,10 +40,10 @@ const Login = () => {
     }
 
     return (
-        <div>
+        <div className="bg-artsy">
             <Form action="/login" method="POST">
                 <label>
-                    Username
+                    Email Address
                     <input name="username" type="email" placeholder="bingusbongusbungus" autoComplete="email" required/>
                 </label>
                 <label>

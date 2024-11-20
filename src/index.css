@@ -2,43 +2,99 @@
 @tailwind components;
 @tailwind utilities;
 
+.bg-artsy {
+  background-color: rgba(255, 255, 255, 0.6);  /* Lighter semi-transparent white */
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 30%, rgba(192, 237, 255, 0.7) 100%);  /* Soft pastel gradient */
+  background-size: cover;  /* Ensure the background covers the entire section */
+  background-position: center;  /* Center the gradient */
+  padding: 40px;  /* Adds padding to the overlay */
+  border-radius: 12px;  /* Optional rounded corners for an artistic look */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);  /* Soft shadow to give depth */
+  z-index: 1;  /* Makes sure this layer sits above the background */
+}
+
+@font-face {
+  font-family: 'Astrena'; /* Name your font family */
+  src: url('/fonts/Astrena_Demo.ttf'); /* Locate the .ttf file within your directory*/
+}
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Astrena', sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  color: rgba(255, 255, 255, 0.87);  /* This is just for text, not the background */
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Ensure html and body take up the full height of the viewport */
+html, body {
+  height: 100%;  /* Take up full height */
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;  /* Prevent horizontal scrolling */
+}
+
+/* Body styling */
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  color: var(--text-color);
+  transition: all 0.3s ease-in-out;
+  padding-top: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  
+  /* Set background image */
+  background-image: url('/src/images/background.jpg'); /* Adjust path if necessary */
+  background-size: cover;  /* Make the image cover the entire page */
+  background-position: center;  /* Center the image */
+  background-repeat: no-repeat;  /* Prevent the image from repeating */
+  
+  /* Set transparent background for body */
+  background-color: transparent; /* Ensure body has transparent background */
+}
+
+/* Container styling to handle centering and prevent overflow */
+.container {
+  width: 100%;  /* Ensure it takes the full width */
+  max-width: 1200px;  /* Prevent it from getting too wide */
+  margin: 0 auto;  /* Center it on the page */
+  padding: 20px;
+  box-sizing: border-box;  /* Include padding in the total width calculation */
+}
+
+/* Global headings */
+h1 {
+  font-size: 3.2rem;
+  line-height: 1.1;
+  color: var(--heading-color);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+/* Links */
 a {
   font-weight: 500;
   color: #646cff;
   text-decoration: inherit;
+  transition: color 0.25s ease-in-out;
 }
+
 a:hover {
   color: #535bf2;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+a:focus-visible {
+  outline: 2px solid #646cff;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
+/* Button styling */
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -47,26 +103,140 @@ button {
   font-weight: 500;
   font-family: inherit;
   background-color: #1a1a1a;
+  color: white;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+button:hover {
+  background-color: #535bf2;
+  border-color: #535bf2;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px solid #646cff;
+  box-shadow: 0 0 0 4px rgba(100, 108, 255, 0.3);
+}
+
+/* Light Mode Styles */
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    --background-color: transparent;
+    --text-color: #213547;
+    --heading-color: #213547;
   }
+
+  body {
+    background-color: transparent;
+    color: var(--text-color);
+  }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
+    color: #213547;
+    border: 1px solid #ddd;
   }
+
+  button:hover {
+    background-color: #e0e7ff;
+    border-color: #6366f1;
+  }
+
+  button:focus,
+  button:focus-visible {
+    box-shadow: 0 0 0 4px rgba(100, 108, 255, 0.4);
+  }
+}
+
+/* Dark Mode Styles */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: transparent;
+    --text-color: #f9f9f9;
+    --heading-color: #f9f9f9;
+  }
+
+  body {
+    background-color: transparent;
+    color: var(--text-color);
+  }
+
+  /* Dark Background Sections */
+  .combat-stats, .weapons, .armor {
+    background-color: #333;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  a:hover {
+    color: #8a80f9;
+  }
+
+  button {
+    background-color: #1a1a1a;
+    color: #f9f9f9;
+    border: 1px solid #444;
+  }
+
+  button:hover {
+    background-color: #535bf2;
+    border-color: #535bf2;
+  }
+
+  button:focus,
+  button:focus-visible {
+    box-shadow: 0 0 0 4px rgba(100, 108, 255, 0.3);
+  }
+}
+
+/* Utility Classes for Layout & Flexbox */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.space-x-4 > * + * {
+  margin-left: 1rem;
+}
+
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+/* Border Radius, Shadows, and Transitions */
+.rounded-lg {
+  border-radius: 8px;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.transition-all {
+  transition: all 0.3s ease-in-out;
 }

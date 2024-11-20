@@ -4,10 +4,11 @@ import { useCharacter } from '../CharacterContext';
 
 const Inventory = () => {
     const { characterId } = useParams(); // Get the characterId from the URL
-    const { character } = useCharacter(); // Get character data from the context
+    const { character, updateCharacter } = useCharacter(); // Get character data from the context
     const [inventoryData, setInventoryData] = useState([]); // Store inventory data
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [newItem, setNewItem] = useState(''); // For adding a new inventory item
 
     useEffect(() => {
         const fetchInventoryData = async () => {
@@ -43,29 +44,82 @@ const Inventory = () => {
         fetchInventoryData();
     }, [characterId, character]);
 
+    const handleItemChange = (index, newValue) => {
+        const updatedInventory = [...inventoryData];
+        updatedInventory[index] = newValue;
+        setInventoryData(updatedInventory);
+    };
+
+    const handleAddItem = () => {
+        if (newItem.trim() !== '') {
+            const updatedInventory = [...inventoryData, newItem];
+            setInventoryData(updatedInventory);
+            setNewItem(''); // Clear the input field after adding
+        }
+    };
+
+    const handleSaveInventory = () => {
+        updateCharacter('inventoryItems', inventoryData); // Update the character's inventory
+        alert('Inventory saved!');
+    };
+
     if (loading) {
-        return <h2>Loading inventory data...</h2>;
+        return <h2 className="text-center text-xl font-semibold text-gray-700">Loading inventory data...</h2>;
     }
 
     if (error) {
-        return <h2>Error: {error}</h2>;
+        return <h2 className="text-center text-xl font-semibold text-red-600">Error: {error}</h2>;
     }
 
     return (
-        <div>
-            <h1>Gear</h1>
-            <ul>
+        <div className="max-w-7xl mx-auto px-4 py-8 bg-artsy">
+            <h1 className="text-3xl font-bold text-center mb-6 text-indigo-600">Gear</h1>
+
+            <div className="space-y-4">
                 {inventoryData.length > 0 ? (
                     inventoryData.map((item, index) => (
-                        <li key={index}>
-                            <h3>{item}</h3>
-                            {/* You can add more item details here if needed */}
-                        </li>
+                        <div key={index} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg shadow-md">
+                            <label htmlFor={`item-${index}`} className="w-1/4 text-lg font-medium text-gray-700">{`Item ${index + 1}:`}</label>
+                            <input
+                                id={`item-${index}`}
+                                type="text"
+                                value={item}
+                                onChange={(e) => handleItemChange(index, e.target.value)}
+                                className="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                        </div>
                     ))
                 ) : (
-                    <p>No gear found.</p>
+                    <p className="text-center text-lg text-gray-500">No gear found.</p>
                 )}
-            </ul>
+            </div>
+
+            <div className="mt-6">
+                <input
+                    type="text"
+                    value={newItem}
+                    onChange={(e) => setNewItem(e.target.value)}
+                    className="p-2 border border-gray-300 rounded-md w-full mb-4"
+                    placeholder="Add a new item"
+                />
+                <button
+                    type="button"
+                    onClick={handleAddItem}
+                    className="px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                    Add Item
+                </button>
+            </div>
+
+            <div className="mt-6 text-center">
+                <button
+                    type="button"
+                    onClick={handleSaveInventory}
+                    className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                    Save Inventory
+                </button>
+            </div>
         </div>
     );
 };

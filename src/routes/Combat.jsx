@@ -109,7 +109,7 @@ const Combat = () => {
     }, [characterId, character.characterClassId, character]);
 
     if (loading) {
-        return <h2 className="text-center text-lg">Loading combat data...</h2>;
+        return <h2 className="text-center text-xl font-semibold text-gray-700">Loading combat data...</h2>;
     }
 
     if (error) {
@@ -117,65 +117,60 @@ const Combat = () => {
     }
 
     return (
-        <div className="container mx-auto px-6 py-8">
-            <h1 className="text-4xl font-bold mb-8 text-center">Combat Statistics</h1>
+        <div className="container mx-auto px-6 py-8 bg-artsy">
+            <h1 className="text-4xl font-bold mb-8 text-center text-gray-900">Combat Statistics</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                    <h2 className="text-xl font-semibold mb-2">Hit Points:</h2>
-                    <p className="text-lg">{combatData.hit_points}</p>
+                    <h2 className="text-xl font-semibold mb-2 text-gray-900">Hit Points:</h2>
+                    <p className="text-lg text-gray-800">{combatData.hit_points}</p>
                 </div>
 
                 <div>
-                    <h2 className="text-xl font-semibold mb-2">Armor Class:</h2>
-                    <p className="text-lg">{combatData.armor_class}</p>
-                    <h3 className="font-medium mt-2">Touch AC:</h3>
-                    <p>{combatData.touch_ac}</p>
-                    <h3 className="font-medium mt-2">Flat-Footed AC:</h3>
-                    <p>{combatData.flat_footed_ac}</p>
+                    <h2 className="text-xl font-semibold mb-2 text-gray-900">Armor Class:</h2>
+                    <p className="text-lg text-gray-800">{combatData.armor_class}</p>
+                    <h3 className="font-medium mt-2 text-gray-900">Touch AC:</h3>
+                    <p className="text-gray-800">{combatData.touch_ac}</p>
+                    <h3 className="font-medium mt-2 text-gray-900">Flat-Footed AC:</h3>
+                    <p className="text-gray-800">{combatData.flat_footed_ac}</p>
                 </div>
 
                 <div>
-                    <h2 className="text-xl font-semibold mb-2">Attack Bonus:</h2>
-                    <p className="text-lg">{combatData.attack_bonus}</p>
+                    <h2 className="text-xl font-semibold mb-2 text-gray-900">Attack Bonus:</h2>
+                    <p className="text-lg text-gray-800">{combatData.attack_bonus}</p>
                 </div>
 
                 <div>
-                    <h2 className="text-xl font-semibold mb-2">Melee Attack Bonus:</h2>
-                    <p className="text-lg">{combatData.melee_attack_bonus}</p>
+                    <h2 className="text-xl font-semibold mb-2 text-gray-900">Melee Attack Bonus:</h2>
+                    <p className="text-lg text-gray-800">{combatData.melee_attack_bonus}</p>
                 </div>
 
                 <div>
-                    <h2 className="text-xl font-semibold mb-2">Ranged Attack Bonus:</h2>
-                    <p className="text-lg">{combatData.ranged_attack_bonus}</p>
+                    <h2 className="text-xl font-semibold mb-2 text-gray-900">Ranged Attack Bonus:</h2>
+                    <p className="text-lg text-gray-800">{combatData.ranged_attack_bonus}</p>
                 </div>
 
                 <div>
-                    <h2 className="text-xl font-semibold mb-2">Damage:</h2>
-                    <p className="text-lg">{combatData.damage}</p>
-                </div>
-
-                <div>
-                    <h2 className="text-xl font-semibold mb-2">Saving Throws:</h2>
+                    <h2 className="text-xl font-semibold mb-2 text-gray-900">Saving Throws:</h2>
                     <div>
-                        <h3 className="font-medium">Fortitude:</h3>
-                        <p>{combatData.fortitude_save}</p>
+                        <h3 className="font-medium text-gray-900">Fortitude:</h3>
+                        <p className="text-gray-800">{combatData.fortitude_save}</p>
                     </div>
                     <div>
-                        <h3 className="font-medium">Reflex:</h3>
-                        <p>{combatData.reflex_save}</p>
+                        <h3 className="font-medium text-gray-900">Reflex:</h3>
+                        <p className="text-gray-800">{combatData.reflex_save}</p>
                     </div>
                     <div>
-                        <h3 className="font-medium">Will:</h3>
-                        <p>{combatData.will_save}</p>
+                        <h3 className="font-medium text-gray-900">Will:</h3>
+                        <p className="text-gray-800">{combatData.will_save}</p>
                     </div>
                 </div>
 
                 <div>
-                    <h2 className="text-xl font-semibold mb-2">Movement Speed:</h2>
-                    <p className="text-lg">{combatData.movement_speed}</p>
-                    <h3 className="font-medium mt-2">Other Speeds:</h3>
-                    <ul className="list-disc pl-6">
+                    <h2 className="text-xl font-semibold mb-2 text-gray-900">Movement Speed:</h2>
+                    <p className="text-lg text-gray-800">{combatData.movement_speed}</p>
+                    <h3 className="font-medium mt-2 text-gray-900">Other Speeds:</h3>
+                    <ul className="list-disc pl-6 text-gray-800">
                         {combatData.speeds.map((speed) => (
                             <li key={speed.type} className="text-lg">{`${speed.type}: ${speed.value} ft.`}</li>
                         ))}
@@ -184,8 +179,8 @@ const Combat = () => {
             </div>
 
             <div className="mt-8">
-                <h2 className="text-xl font-semibold mb-2">Starting Weapons:</h2>
-                <ul className="list-disc pl-6">
+                <h2 className="text-xl font-semibold mb-2 text-gray-900">Starting Weapons:</h2>
+                <ul className="list-disc pl-6 text-gray-800">
                     {weapons.map((weapon) => (
                         <li key={weapon.name} className="text-lg">{weapon.name} - {weapon.damage_dice} damage</li>
                     ))}
@@ -193,8 +188,8 @@ const Combat = () => {
             </div>
 
             <div className="mt-8">
-                <h2 className="text-xl font-semibold mb-2">Starting Armor:</h2>
-                <ul className="list-disc pl-6">
+                <h2 className="text-xl font-semibold mb-2 text-gray-900">Starting Armor:</h2>
+                <ul className="list-disc pl-6 text-gray-800">
                     {armor.map((armorItem) => (
                         <li key={armorItem.name} className="text-lg">{armorItem.name} - AC Bonus: {armorItem.armor_bonus}</li>
                     ))}
@@ -203,5 +198,5 @@ const Combat = () => {
         </div>
     );
 };
-
+    
 export default Combat;

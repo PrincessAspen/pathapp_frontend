@@ -6,14 +6,15 @@ import CharacterProvider from './CharacterContext'
 function App() {
 
   return (
-    <div>
+    <div className="h-full">
+      {/* Applying tailwind classes to ensure the background and full height */}
       <AuthProvider>
         <CharacterProvider>
-          <Routes/>
+          <Routes />
         </CharacterProvider>
       </AuthProvider>
     </div>
   );
 };
 
-export default App
+export default App;
