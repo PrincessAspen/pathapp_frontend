@@ -1,19 +1,52 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCharacter } from '../CharacterContext';
+import { useAuth } from '../AuthContext';
 
 const Home = () => {
-    const { userCharacters, loading, deleteCharacter, fetchUserCharacters, updateCharacter } = useCharacter();
+    const { user, token } = useAuth();  // Get user and token from AuthContext
+    const [loading, setLoading] = useState(false); // Track loading state
+    const {character, deleteCharacter, updateCharacter } = useCharacter();
     const [classNames, setClassNames] = useState({});
     const [raceNames, setRaceNames] = useState({});
+    const [userCharacters, setUserCharacters] = useState([]); // Store fetched characters
     const navigate = useNavigate();
+
+    const fetchUserCharacters = async () => {
+        if (!token) {
+            // Retry fetching after a short delay if the token is not available yet
+            setTimeout(fetchUserCharacters, 500);  // Try again in 500ms
+            return;
+        }
+        
+        setLoading(true);
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/characters/`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`, // Send token for authentication
+                },
+            });
+    
+            if (response.ok) {
+                const data = await response.json();
+                setUserCharacters(data); // Update the state with the fetched characters
+            } else {
+                console.error('Failed to fetch characters');
+            }
+        } catch (error) {
+            console.error('Error fetching characters:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Fetch characters only once when the component mounts
     useEffect(() => {
         if (userCharacters.length === 0 && !loading) {
             fetchUserCharacters();
         }
-    }, [userCharacters.length, loading, fetchUserCharacters]);
+    }, []);
 
     // Fetch class and race names when userCharacters is populated
     useEffect(() => {

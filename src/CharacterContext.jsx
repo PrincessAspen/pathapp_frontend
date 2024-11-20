@@ -14,7 +14,6 @@ export const useCharacter = () => {
 export const CharacterProvider = ({ children }) => {
     const { user, token } = useAuth();  // Get user and token from AuthContext
     const [userCharacters, setUserCharacters] = useState([]); // Store fetched characters
-    const [loading, setLoading] = useState(false); // Track loading state
     const [character, setCharacter] = useState({
         name: '',
         alignmentId:0,
@@ -31,47 +30,6 @@ export const CharacterProvider = ({ children }) => {
         inventoryItems: [],
         money: []
     }); // Store the current character being created
-
-    useEffect(() => {
-        // Fetch the user's characters only when the token is available
-        if (user && token) {
-            fetchUserCharacters();
-        }
-    }, [user, token]); 
-
-    const fetchUserCharacters = async () => {
-        if (!token) {
-            // Retry fetching after a short delay if the token is not available yet
-            setTimeout(fetchUserCharacters, 500);  // Try again in 500ms
-            return;
-        }
-        
-        setLoading(true);
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/characters/`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`, // Send token for authentication
-                },
-            });
-    
-            if (response.ok) {
-                const data = await response.json();
-                setUserCharacters(data); // Update the state with the fetched characters
-                if (data.length > 0) {
-                    setCharacter(data[0]);  // Set the first character as the current character if any exist
-                }
-            } else {
-                console.error('Failed to fetch characters');
-            }
-        } catch (error) {
-            console.error('Error fetching characters:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-    
-    
 
     const updateCharacter = (key, value) => {
         console.log(`Updating character's ${key} to ${value}`);
@@ -183,8 +141,6 @@ export const CharacterProvider = ({ children }) => {
             value={{
                 userCharacters, // List of characters fetched from the database
                 character, // Current character being created
-                loading, // Loading state
-                fetchUserCharacters, // Function to fetch characters
                 updateCharacter, // Function to update character details
                 resetCharacter, // Function to reset the current character data
                 saveCharacter, // Function to save character to the backend
