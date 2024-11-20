@@ -75,14 +75,6 @@ const MainNav = () => {
                                             Spellcasting
                                         </NavLink>
                                     </li>
-                                    <li className="w-full md:w-auto">
-                                        <NavLink 
-                                            to="/creation" 
-                                            className="block text-center py-2 px-4 bg-blue-700 hover:bg-blue-600 rounded-md text-white"
-                                        >
-                                            Character Creator
-                                        </NavLink>
-                            </li>
                                 </>
                             ) : null}
                             {/* Character Creator link should always be visible when the user is logged in */}
