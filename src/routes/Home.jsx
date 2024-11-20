@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';  // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import { useCharacter } from '../CharacterContext';
 
 const Home = () => {
     const { userCharacters, loading, deleteCharacter, fetchUserCharacters, updateCharacter } = useCharacter();
-    const [classNames, setClassNames] = useState({});  // Store the class names by class ID
-    const [raceNames, setRaceNames] = useState({});   // Store the race names by race ID
-    const navigate = useNavigate(); // Initialize useNavigate
+    const [classNames, setClassNames] = useState({});
+    const [raceNames, setRaceNames] = useState({});
+    const navigate = useNavigate();
 
+    // Fetch characters only once when the component mounts
     useEffect(() => {
-        if (!userCharacters.length) {
+        if (userCharacters.length === 0 && !loading) {
             fetchUserCharacters();
         }
-    }, [userCharacters]);
+    }, [userCharacters.length, loading, fetchUserCharacters]);
 
+    // Fetch class and race names when userCharacters is populated
     useEffect(() => {
         const fetchClassNames = async () => {
             try {
@@ -51,14 +53,14 @@ const Home = () => {
             }
         };
 
+        // Only run the fetch calls if `userCharacters` is populated
         if (userCharacters.length > 0) {
             fetchClassNames();
             fetchRaceNames();
         }
-    }, [userCharacters]);
+    }, [userCharacters]);  // Runs only when `userCharacters` changes
 
     const handleViewCharacter = (character) => {
-        // Update the character context with the selected character's data
         updateCharacter('name', character.name);
         updateCharacter('level', character.level);
         updateCharacter('characterClassId', character.character_class_id);
@@ -68,7 +70,6 @@ const Home = () => {
         updateCharacter('stats', character.stats);
         updateCharacter('skills', character.skills);
 
-        // Navigate to the character's main page
         navigate(`/main/${character.id}`);
     };
 
@@ -77,36 +78,38 @@ const Home = () => {
     }
 
     return (
-        <div className="min-h-screen bg-artsy">
-            <h1 className="text-6xl font-extrabold text-center text-indigo-600 mb-12">Your Characters</h1>
-            {userCharacters.length === 0 ? (
-                <h2 className="text-4xl text-center text-gray-600 font-extrabold">No characters found.</h2>
-            ) : (
-                <ul className="space-y-8">
-                    {userCharacters.map((character) => (
-                        <li key={character.id} className="bg-white shadow-lg rounded-lg p-8">
-                            <h3 className="text-3xl font-extrabold text-gray-800">{character.name}</h3>
-                            <p className="text-xl text-gray-600 font-extrabold">Level: {character.level}</p>
-                            <p className="text-xl text-gray-600 font-extrabold">Race: {raceNames[character.race_id] || 'N/A'}</p>
-                            <p className="text-xl text-gray-600 font-extrabold">Class: {classNames[character.character_class_id] || 'N/A'}</p>
-                            <div className="mt-6 flex space-x-6">
-                                <button 
-                                    onClick={() => handleViewCharacter(character)} 
-                                    className="px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 font-extrabold text-xl"
-                                >
-                                    View
-                                </button>
-                                <button 
-                                    onClick={() => deleteCharacter(character.id)} 
-                                    className="px-6 py-3 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 font-extrabold text-xl"
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            )}
+        <div className="container mx-auto px-4 py-8 bg-artsy">
+            <div className="max-w-7xl mx-auto px-4">
+                <h1 className="text-6xl font-extrabold text-center text-indigo-600 mb-12">Your Characters</h1>
+                {userCharacters.length === 0 ? (
+                    <h2 className="text-4xl text-center text-gray-600 font-extrabold">No characters found.</h2>
+                ) : (
+                    <ul className="space-y-8">
+                        {userCharacters.map((character) => (
+                            <li key={character.id} className="bg-white shadow-lg rounded-lg p-8">
+                                <h3 className="text-3xl font-extrabold text-gray-800">{character.name}</h3>
+                                <p className="text-xl text-gray-600 font-extrabold">Level: {character.level}</p>
+                                <p className="text-xl text-gray-600 font-extrabold">Race: {raceNames[character.race_id] || 'N/A'}</p>
+                                <p className="text-xl text-gray-600 font-extrabold">Class: {classNames[character.character_class_id] || 'N/A'}</p>
+                                <div className="mt-6 flex space-x-6">
+                                    <button 
+                                        onClick={() => handleViewCharacter(character)} 
+                                        className="px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300 font-extrabold text-xl"
+                                    >
+                                        View
+                                    </button>
+                                    <button 
+                                        onClick={() => deleteCharacter(character.id)} 
+                                        className="px-6 py-3 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-4 focus:ring-red-300 font-extrabold text-xl"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
         </div>
     );
 };

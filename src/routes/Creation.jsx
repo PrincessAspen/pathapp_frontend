@@ -324,7 +324,7 @@ const CharacterCreationPage = () => {
 
     return (
     <div className="container mx-auto px-4 py-8 bg-artsy" >
-        <h1 className="text-3xl font-extrabold mb-6 text-center text-gray-800">Character Creation</h1>
+        <h1 className="text-6xl font-bold text-center text-indigo-600 mb-8">Character Creation</h1>
 
         {/* Character Name Input */}
         <div className="mb-4">
@@ -373,69 +373,103 @@ const CharacterCreationPage = () => {
         </div>
 
         {/* Stats Display */}
-        <div className="mb-4">
-            <h2 className="text-xl font-extrabold mb-2 text-gray-800">Stats</h2>
-            {Object.keys(tempData.stats).length === 0 ? (
-                <p className="text-gray-800 font-extrabold">No stats rolled yet</p>
-            ) : (
-                Object.keys(tempData.stats).map((stat) => (
-                    <div key={stat} className="mb-2">
-                        <label className="mr-2 text-gray-800 font-extrabold">{stat}:</label>
-                        <input
-                            type="number"
-                            value={tempData.stats[stat] || 0}
-                            onChange={(e) => handleStatChange(stat, parseInt(e.target.value))}
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                ))
-            )}
-            <button onClick={rollStats} className="px-4 py-2 bg-blue-500 text-white rounded mt-4 hover:bg-blue-600 flex items-center justify-center">
-                {/* Displaying the d20 image */}
-                <img src={d20Image} alt="Roll Stats" className="w-8 h-8" />
-            </button>
-        </div>
+            <div className="mb-4">
+                <h2 className="text-xl font-extrabold mb-2 text-gray-800">Stats</h2>
+                <div className="flex space-x-4 mb-4 justify-center">
+                    {Object.keys(tempData.stats).length === 0 ? (
+                        <p className="text-gray-800 font-extrabold text-xl">Click the die to roll Stats</p>
+                    ) : (
+                        Object.keys(tempData.stats).map((stat) => (
+                            <div key={stat} className="flex flex-col items-center">
+                                <label className="mr-2 text-gray-800 font-extrabold">{stat}:</label>
+                                <input
+                                    type="number"
+                                    value={tempData.stats[stat] || 0}
+                                    onChange={(e) => handleStatChange(stat, parseInt(e.target.value))}
+                                    className="w-full p-2 border border-gray-300 rounded text-center"
+                                />
+                            </div>
+                        ))
+                    )}
+                </div>
+                <div className="flex justify-center">
+                    <button
+                        onClick={rollStats}
+                        className="px-6 py-4 bg-blue-500 text-white rounded mt-4 hover:bg-blue-600 text-2xl flex items-center justify-center"
+                    >
+                        <img src={d20Image} alt="Roll Stats" className="w-12 h-12" />
+                    </button>
+                </div>
+            </div>
+
+        {/* Class Selection */}
+            <div className="mb-6">
+                <label className="text-xl font-semibold text-gray-700">Class</label>
+                <select
+                    value={tempData.classId}
+                    onChange={handleClassChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg"
+                >
+                    <option value="">Select Class</option>
+                    {classes.map((cls) => (
+                        <option key={cls.id} value={cls.id}>
+                            {cls.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            
 
         {/* Column Layout for Feats and Skills */}
         <div className="flex space-x-12 mt-4">
             {/* Feats Section */}
             <div className="flex-1">
-                <h2 className="text-xl font-extrabold mb-2 text-gray-800">Available Feats: {tempData.featCount}</h2>
-                <h2 className="text-xl font-extrabold mb-2 text-gray-800">Feats</h2>
-                {feats.map((feat) => (
-                    <div key={feat.id} className="mb-2">
-                        <label className="mr-2 text-gray-900 font-extrabold">{feat.name}</label>
+            <h2 className="text-2xl font-extrabold mb-4 text-gray-800">Feats</h2>
+            <div className="mb-4 text-xl font-extrabold text-gray-800">
+                <span>Feats Remaining: </span>
+                <span className="ml-2 text-2xl text-gray-600">{tempData.featCount}</span>
+            </div>
+            {feats.map((feat) => (
+                <div key={feat.id} className="mb-4 flex items-center">
+                    <label className="mr-4 text-lg text-gray-900 font-extrabold">{feat.name}</label>
+                    <input
+                        type="checkbox"
+                        checked={tempData.feats.includes(feat.id)}
+                        onChange={() => handleFeatSelection(feat.id)}
+                        disabled={tempData.featCount <= 0}
+                        className="form-checkbox h-6 w-6"
+                    />
+                </div>
+            ))}
+        </div>
+
+
+            {/* Skills Section */}
+            <div className="flex-1">
+                <h2 className="text-2xl font-extrabold mb-4 text-gray-800">Skills</h2>
+                <div className="mb-4 text-xl font-extrabold text-gray-800">
+                    <span>Skill Points Remaining: </span>
+                    <span className="ml-2 text-2xl text-gray-600">{tempData.availableSkillPoints}</span>
+                </div>
+                {skills.map((skill) => (
+                    <div key={skill.id} className="mb-4">
+                        <label className="block text-xl text-gray-800 font-extrabold mb-2">{skill.name} (Associated Stat: {stats.find(stat => stat.id === skill.modifying_stat_id)?.name})</label>
                         <input
-                            type="checkbox"
-                            checked={tempData.feats.includes(feat.id)}
-                            onChange={() => handleFeatSelection(feat.id)}
-                            disabled={tempData.featCount <= 0} // Disable if no feats are available
-                            className="form-checkbox"
+                            type="number"
+                            min="0"
+                            max={tempData.level}
+                            value={tempData.skills[skill.id] || 0}
+                            onChange={(e) => handleSkillRankChange(skill.id, parseInt(e.target.value))}
+                            className="w-20 p-2 border border-gray-300 rounded text-lg"
                         />
+                        <span className="block mt-2 text-xl text-gray-800 font-extrabold">
+                            Final Value: {getSkillFinalValue(skill.id)}
+                        </span>
                     </div>
                 ))}
             </div>
 
-        {/* Skills Section */}
-        <div className="flex-1">
-            <h2 className="text-xl font-extrabold mb-2 text-gray-800">Skills</h2>
-            {skills.map((skill) => (
-                <div key={skill.id} className="mb-4">
-                    <label className="block text-gray-800 font-extrabold">{skill.name} (Associated Stat: {stats.find(stat => stat.id === skill.modifying_stat_id)?.name})</label>
-                    <input
-                        type="number"
-                        min="0"
-                        max={tempData.level}
-                        value={tempData.skills[skill.id] || 0}
-                        onChange={(e) => handleSkillRankChange(skill.id, parseInt(e.target.value))}
-                        className="w-full p-2 border border-gray-300 rounded"
-                    />
-                    <span className="block mt-1 text-gray-800 font-extrabold">
-                        Final Value: {getSkillFinalValue(skill.id)}
-                    </span>
-                </div>
-                ))}
-        </div>
         </div>
 
         {/* Save Character */}

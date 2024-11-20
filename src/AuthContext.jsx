@@ -19,8 +19,8 @@ const AuthProvider = ({children}) => {
     const clearSession = () => {
         setToken(null);
         setUser(null);
-        sessionStorage.removeItem('sb-access-token', access_token)
-        sessionStorage.removeItem('sb-user', user_id)
+        sessionStorage.removeItem('sb-access-token');  // Correctly remove the access token
+        sessionStorage.removeItem('sb-user');  // Correctly remove the user id
     };
 
     const logout = async () => {

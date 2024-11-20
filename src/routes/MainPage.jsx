@@ -17,33 +17,26 @@ const CharacterOverview = () => {
     useEffect(() => {
         const fetchCharacterData = async () => {
             try {
-                console.log('Fetching character data...');
                 if (!character || !character.characterClassId) {
                     throw new Error('Character or class not found');
                 }
 
-                console.log('Character Data:', character);
-                
                 const classResponse = await fetch(`${import.meta.env.VITE_API_URL}/character_classes/${character.characterClassId}`);
                 if (!classResponse.ok) {
                     throw new Error('Failed to fetch class data');
                 }
                 const classDetails = await classResponse.json();
-                console.log('Class Data:', classDetails);
                 setClassData(classDetails);
 
                 const feats = character.feats || [];
-                console.log('Feats:', feats);
                 const featPromises = feats.map(featId =>
                     fetch(`${import.meta.env.VITE_API_URL}/feats/${featId}`).then(res => res.json())
                 );
                 const featsJson = await Promise.all(featPromises);
-                console.log('Fetched Feats:', featsJson);
                 setFeatsData(featsJson);
 
                 const skillResponse = await fetch(`${import.meta.env.VITE_API_URL}/skills/`);
                 const skillsData = await skillResponse.json();
-                console.log('Fetched Skills:', skillsData);
                 setSkills(skillsData);
 
                 const constitution = character.stats?.Constitution || 10;
@@ -51,14 +44,13 @@ const CharacterOverview = () => {
                 const conModifier = Math.floor((constitution - 10) / 2);
                 const hitPoints = hitDie + conModifier;
 
-                console.log('Calculated HP:', hitPoints);
+                const armorDataPromises = (classDetails.starting_armor || [])
+                    .filter(item => item && !item.toLowerCase().includes("shield"))
+                    .map(armorName => fetch(`${import.meta.env.VITE_API_URL}/armor?name=${armorName}`));
 
-                const armorDataPromises = classDetails.starting_armor.filter(item => !item.toLowerCase().includes("shield")).map((armorName) =>
-                    fetch(`${import.meta.env.VITE_API_URL}/armor?name=${armorName}`)
-                );
-                const shieldDataPromises = classDetails.starting_armor.filter(item => item.toLowerCase().includes("shield")).map((shieldName) =>
-                    fetch(`${import.meta.env.VITE_API_URL}/armor?name=${shieldName}`)
-                );
+                const shieldDataPromises = (classDetails.starting_armor || [])
+                    .filter(item => item && item.toLowerCase().includes("shield"))
+                    .map(shieldName => fetch(`${import.meta.env.VITE_API_URL}/armor?name=${shieldName}`));
 
                 const armorJsonResponses = await Promise.all(armorDataPromises);
                 const shieldJsonResponses = await Promise.all(shieldDataPromises);
@@ -95,28 +87,16 @@ const CharacterOverview = () => {
     };
 
     const getSkillFinalValue = (skillId) => {
-        console.log('Calculating final value for skill ID:', skillId);
-
-        const skill = skills.find(s => s.id === skillId); 
-        console.log('Skill:', skill);
-
+        const skill = skills.find(s => s.id === skillId);
         if (!skill) return 0;
 
-        const skillRank = character.skills?.[skillId] || 0;  
+        const skillRank = character.skills?.[skillId] || 0;
         const statName = statMapping[skill.modifying_stat_id];
-        const statValue = character.stats?.[statName] || 10;  
-        const statModifier = Math.floor((statValue - 10) / 2);  
-
-        console.log('Skill Rank:', skillRank);
-        console.log('Stat Value:', statValue);
-        console.log('Stat Modifier:', statModifier);
+        const statValue = character.stats?.[statName] || 10;
+        const statModifier = Math.floor((statValue - 10) / 2);
 
         const isClassSkill = classData?.class_skills?.includes(skill.name);
-        console.log('Is Class Skill:', isClassSkill);
-
         const classBonus = (skillRank >= 1 && isClassSkill) ? 3 : 0;
-
-        console.log('Class Bonus:', classBonus);
 
         return skillRank + statModifier + classBonus;
     };
@@ -131,58 +111,75 @@ const CharacterOverview = () => {
 
     return (
         <div className="max-w-7xl mx-auto px-6 py-12 bg-artsy">
-            <h1 className="text-4xl font-bold text-center text-indigo-600 mb-12">Character Overview</h1>
+            <h1 className="text-6xl font-bold text-center text-indigo-600 mb-8">Character Overview</h1>
 
-            <div className="space-y-8 mb-8">
-                <div className="flex flex-col md:flex-row justify-between items-center">
-                    <div className="flex flex-col md:w-1/3">
-                        <h2 className="font-semibold text-xl text-gray-800">Name:</h2>
-                        <p className="text-lg text-gray-600">{character.name || 'N/A'}</p>
-                    </div>
-                    <div className="flex flex-col md:w-1/3">
-                        <h2 className="font-semibold text-xl text-gray-800">Class:</h2>
-                        <p className="text-lg text-gray-600">{classData?.name || 'N/A'}</p>
-                    </div>
+            {/* Top Section: Name, Class, Hit Points */}
+            <div className="flex flex-col md:flex-row justify-center items-center space-x-12 mb-12 p-4 bg-gray-100 rounded-lg shadow-md">
+                <div className="flex flex-col items-center ">
+                    <h2 className="font-semibold text-3xl text-gray-800">Name:</h2>
+                    <p className="text-2xl text-gray-600 p-4 bg-gray-200 rounded-lg shadow-md">{character.name || 'N/A'}</p>
                 </div>
-
-                <div className="flex flex-col md:flex-row justify-between items-center">
-                    <div className="flex flex-col md:w-1/3">
-                        <h2 className="font-semibold text-xl text-gray-800">Hit Points:</h2>
-                        <p className="text-lg text-gray-600">{combatData?.hit_points || 'N/A'}</p>
-                    </div>
+                <div className="flex flex-col items-center">
+                    <h2 className="font-semibold text-3xl text-gray-800">Class:</h2>
+                    <p className="text-2xl text-gray-600 p-4 bg-gray-200 rounded-lg shadow-md">{classData?.name || 'N/A'}</p>
+                </div>
+                <div className="flex flex-col items-center">
+                    <h2 className="font-semibold text-3xl text-gray-800">Hit Points:</h2>
+                    <p className="text-2xl text-gray-600 p-4 bg-gray-200 rounded-lg shadow-md">{combatData?.hit_points || 'N/A'}</p>
                 </div>
             </div>
 
-            <div className="space-y-10 mb-8">
-                <h3 className="text-2xl font-semibold text-gray-800">Feats:</h3>
-                {featsData.length > 0 ? (
-                    <ul className="space-y-4">
-                        {featsData.map((feat, index) => (
-                            <li key={index} className="text-lg text-gray-600">{feat.name || 'Unnamed feat'}</li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p className="text-lg text-gray-600">No feats available.</p>
-                )}
+            {/* Character Stats Display */}
+            <div className="space-y-8 mb-8 p-4 bg-gray-100 rounded-lg shadow-md">
+                <h2 className="text-3xl font-semibold text-gray-800 text-center">Character Stats:</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    {Object.keys(character.stats || {}).map(statKey => (
+                        <div key={statKey} className="flex flex-col items-center text-xl text-gray-600 p-4 bg-gray-200 rounded-lg shadow-md">
+                            <span className="font-medium text-2xl text-gray-800">{statKey}</span>
+                            <span className="text-xl text-gray-600">{character.stats[statKey]}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
 
-            <div className="space-y-10">
-                <h3 className="text-2xl font-semibold text-gray-800">Skills:</h3>
-                {skills.length > 0 ? (
-                    <ul className="space-y-4">
-                        {skills.map((skill) => {
-                            const skillRank = character.skills?.[skill.id] || 0; 
-                            return (
-                                <li key={skill.id} className="text-lg text-gray-600">
-                                    {skill.name || 'Unknown Skill'}: 
-                                    {getSkillFinalValue(skill.id)}
+            {/* Feats and Skills Display in Two Columns */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 ">
+                {/* Feats Display (Left Column) */}
+                <div className="space-y-10 mb-8 p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h3 className="text-2xl font-semibold text-gray-800">Feats:</h3>
+                    {featsData.length > 0 ? (
+                        <ul className="space-y-4">
+                            {featsData.map((feat, index) => (
+                                <li key={index} className="text-xl text-gray-600 p-4 bg-gray-200 rounded-lg shadow-md">
+                                    <strong>{feat.name || 'Unnamed feat'}</strong>
+                                    <p className="text-lg text-gray-500 mt-2">{feat.description || 'No description available.'}</p>
                                 </li>
-                            );
-                        })}
-                    </ul>
-                ) : (
-                    <p className="text-lg text-gray-600">No skills available.</p>
-                )}
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="text-xl text-gray-600">No feats available.</p>
+                    )}
+                </div>
+
+                {/* Skills Display (Right Column) */}
+                <div className="space-y-10 mb-8 p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h3 className="text-3xl font-semibold text-gray-800">Skills:</h3>
+                    {skills.length > 0 ? (
+                        <ul className="space-y-4">
+                            {skills.map((skill) => {
+                                const skillRank = character.skills?.[skill.id] || 0;
+                                return (
+                                    <li key={skill.id} className="text-xl text-gray-600 p-4 bg-gray-200 rounded-lg shadow-md">
+                                        {skill.name || 'Unknown Skill'}: 
+                                        {getSkillFinalValue(skill.id)}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    ) : (
+                        <p className="text-xl text-gray-600">No skills available.</p>
+                    )}
+                </div>
             </div>
         </div>
     );

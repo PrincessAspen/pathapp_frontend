@@ -71,11 +71,12 @@ const Combat = () => {
                 const constitution = character.stats?.Constitution || 10;
                 const strength = character.stats?.Strength || 10;  // Strength value
                 const dexterity = character.stats?.Dexterity || 10;  // Dexterity value
+                const dexModifier = Math.floor((dexterity-10)/2);
                 const hitDie = classDetails.hit_die || 6;
                 const conModifier = Math.floor((constitution - 10) / 2);
                 const hitPoints = hitDie + conModifier;
 
-                const armorClass = 10 + conModifier;
+                const armorClass = 10 + dexModifier;
                 const babProgression = babDetails ? babDetails[classDetails.bab_progression] : 0; // Ensure correct BAB
                 const attackBonus = babProgression;
 
@@ -118,81 +119,105 @@ const Combat = () => {
 
     return (
         <div className="container mx-auto px-6 py-8 bg-artsy">
-            <h1 className="text-4xl font-bold mb-8 text-center text-gray-900">Combat Statistics</h1>
+            <h1 className="text-6xl font-bold text-center text-indigo-600 mb-8">Combat Statistics</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                    <h2 className="text-xl font-semibold mb-2 text-gray-900">Hit Points:</h2>
-                    <p className="text-lg text-gray-800">{combatData.hit_points}</p>
+                <div className="flex flex-col md:flex-row justify-center items-center space-x-12 mb-12 p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h2 className="text-3xl font-semibold mb-2 text-gray-900">Hit Points:</h2>
+                    <p className="text-6xl text-gray-800">{combatData.hit_points}</p>
                 </div>
 
-                <div>
-                    <h2 className="text-xl font-semibold mb-2 text-gray-900">Armor Class:</h2>
-                    <p className="text-lg text-gray-800">{combatData.armor_class}</p>
-                    <h3 className="font-medium mt-2 text-gray-900">Touch AC:</h3>
-                    <p className="text-gray-800">{combatData.touch_ac}</p>
-                    <h3 className="font-medium mt-2 text-gray-900">Flat-Footed AC:</h3>
-                    <p className="text-gray-800">{combatData.flat_footed_ac}</p>
-                </div>
-
-                <div>
-                    <h2 className="text-xl font-semibold mb-2 text-gray-900">Attack Bonus:</h2>
-                    <p className="text-lg text-gray-800">{combatData.attack_bonus}</p>
-                </div>
-
-                <div>
-                    <h2 className="text-xl font-semibold mb-2 text-gray-900">Melee Attack Bonus:</h2>
-                    <p className="text-lg text-gray-800">{combatData.melee_attack_bonus}</p>
-                </div>
-
-                <div>
-                    <h2 className="text-xl font-semibold mb-2 text-gray-900">Ranged Attack Bonus:</h2>
-                    <p className="text-lg text-gray-800">{combatData.ranged_attack_bonus}</p>
-                </div>
-
-                <div>
-                    <h2 className="text-xl font-semibold mb-2 text-gray-900">Saving Throws:</h2>
-                    <div>
-                        <h3 className="font-medium text-gray-900">Fortitude:</h3>
-                        <p className="text-gray-800">{combatData.fortitude_save}</p>
-                    </div>
-                    <div>
-                        <h3 className="font-medium text-gray-900">Reflex:</h3>
-                        <p className="text-gray-800">{combatData.reflex_save}</p>
-                    </div>
-                    <div>
-                        <h3 className="font-medium text-gray-900">Will:</h3>
-                        <p className="text-gray-800">{combatData.will_save}</p>
+                <div className="flex flex-col md:flex-row justify-center items-center space-x-12 mb-12 p-4 bg-gray-100 rounded-lg shadow-md">
+                    <div className="flex flex-col items-center md:w-1/3">
+                        <h2 className="text-3xl font-semibold text-gray-900 mb-4">Armor Class:</h2>
+                        <div className="p-4 bg-gray-200 rounded-lg shadow-md text-3xl text-gray-800">
+                        {combatData.armor_class}
                     </div>
                 </div>
 
+                <div className="flex flex-col items-center md:w-1/3">
+                    <h3 className="text-3xl font-semibold text-gray-900 mb-4">Touch Class:</h3>
+                    <div className="p-4 bg-gray-200 rounded-lg shadow-md text-2xl text-gray-800">
+                        {combatData.touch_ac}
+                    </div>
+                </div>
+
+                <div className="flex flex-col items-center md:w-1/3">
+                    <h3 className="text-3xl font-semibold text-gray-900 mb-4">Flat-Footed AC:</h3>
+                    <div className="p-4 bg-gray-200 rounded-lg shadow-md text-2xl text-gray-800">
+                        {combatData.flat_footed_ac}
+                    </div>
+                </div>
+            </div>
                 <div>
-                    <h2 className="text-xl font-semibold mb-2 text-gray-900">Movement Speed:</h2>
-                    <p className="text-lg text-gray-800">{combatData.movement_speed}</p>
-                    <h3 className="font-medium mt-2 text-gray-900">Other Speeds:</h3>
-                    <ul className="list-disc pl-6 text-gray-800">
-                        {combatData.speeds.map((speed) => (
-                            <li key={speed.type} className="text-lg">{`${speed.type}: ${speed.value} ft.`}</li>
-                        ))}
-                    </ul>
+
+                <div>
+                <div className="flex flex-col md:flex-row justify-center items-center space-x-12 mb-12 p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h2 className="text-3xl font-semibold mb-2 text-gray-900">Attack Bonus:</h2>
+                    <p className="text-2xl text-gray-600 p-4 bg-gray-200 rounded-lg shadow-md">{combatData.attack_bonus}</p>
+                </div>
+
+                <div className="flex flex-col md:flex-row justify-center items-center space-x-12 mb-12 p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h2 className="text-3xl font-semibold mb-2 text-gray-900">Melee Attack Bonus:</h2>
+                    <p className="text-2xl text-gray-600 p-4 bg-gray-200 rounded-lg shadow-md">{combatData.melee_attack_bonus}</p>
+                </div>
+
+                <div className="flex flex-col md:flex-row justify-center items-center space-x-12 mb-12 p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h2 className="text-2xl font-semibold mb-2 text-gray-900">Ranged Attack Bonus:</h2>
+                    <p className="text-xl text-gray-600 p-4 bg-gray-200 rounded-lg shadow-md">{combatData.ranged_attack_bonus}</p>
+                </div>
+
+                </div>
+
+                </div>
+
+                <div className="flex flex-col md:flex-row justify-center items-center space-x-12 mb-12 p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h2 className="text-3xl font-semibold mb-2 text-gray-900">Saving Throws:</h2>
+                    <div>
+                        <h3 className="font-medium text-gray-900 text-2xl">Fortitude:</h3>
+                        <p className=" text-gray-600 p-4 bg-gray-200 rounded-lg shadow-md text-xl">{combatData.fortitude_save}</p>
+                    </div>
+                    <div>
+                        <h3 className="font-medium text-gray-900 text-2xl">Reflex:</h3>
+                        <p className=" text-gray-600 p-4 bg-gray-200 rounded-lg shadow-md text-xl">{combatData.reflex_save}</p>
+                    </div>
+                    <div>
+                        <h3 className="font-medium text-gray-900 text-2xl">Will:</h3>
+                        <p className=" text-gray-600 p-4 bg-gray-200 rounded-lg shadow-md text-xl">{combatData.will_save}</p>
+                    </div>
+                </div>
+
+                <div className="flex flex-col md:flex-row justify-center items-center space-x-12 mb-12 p-4 bg-gray-100 rounded-lg shadow-md">
+                    <div>
+                        <h2 className="font-semibold mb-2 text-gray-900 text-3xl">Movement Speed:</h2>
+                        <p className="text-2xl text-gray-600 p-4 bg-gray-200 rounded-lg shadow-md">{combatData.movement_speed}</p>
+                    </div>
+                    <div className="text-2xl text-gray-600 p-4 bg-gray-200 rounded-lg shadow-md">
+                        <h3 className="font-medium mt-2 text-gray-900 text-2xl">Other Speeds:</h3>
+                        <ul className="list-disc pl-6 text-gray-800">
+                            {combatData.speeds.map((speed) => (
+                                <li key={speed.type} className="text-xl">{`${speed.type}: ${speed.value} ft.`}</li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
             </div>
 
-            <div className="mt-8">
-                <h2 className="text-xl font-semibold mb-2 text-gray-900">Starting Weapons:</h2>
+            <div className="flex flex-col md:flex-row justify-center items-center space-x-12 mb-12 p-4 bg-gray-100 rounded-lg shadow-md">
+                <h2 className="text-3xl font-semibold mb-2 text-gray-900">Starting Weapons:</h2>
                 <ul className="list-disc pl-6 text-gray-800">
                     {weapons.map((weapon) => (
-                        <li key={weapon.name} className="text-lg">{weapon.name} - {weapon.damage_dice} damage</li>
-                    ))}
+                        <li key={weapon.name} className="text-2xl">{weapon.name} - {weapon.damage_dice} damage</li>
+                    ))  || 'No weapons available.'}
                 </ul>
             </div>
 
-            <div className="mt-8">
-                <h2 className="text-xl font-semibold mb-2 text-gray-900">Starting Armor:</h2>
+            <div className="flex flex-col md:flex-row justify-center items-center space-x-12 mb-12 p-4 bg-gray-100 rounded-lg shadow-md">
+                <h2 className="text-3xl font-semibold mb-2 text-gray-900">Starting Armor:</h2>
                 <ul className="list-disc pl-6 text-gray-800">
                     {armor.map((armorItem) => (
-                        <li key={armorItem.name} className="text-lg">{armorItem.name} - AC Bonus: {armorItem.armor_bonus}</li>
-                    ))}
+                        <li key={armorItem.name} className="text-2xl">{armorItem.name} - AC Bonus: {armorItem.armor_bonus}</li>
+                    )) || 'No armor available.'}
                 </ul>
             </div>
         </div>

@@ -98,6 +98,7 @@ export const CharacterProvider = ({ children }) => {
             money: [],
             raceId: null
         });
+        setUserCharacters([])
     };
 
     // Save the character to the backend (to the database)
