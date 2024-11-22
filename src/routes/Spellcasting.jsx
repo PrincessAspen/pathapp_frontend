@@ -39,7 +39,7 @@ const Spellcasting = () => {
 
                 // Fetch spells if caster type exists
                 if (casterDetails) {
-                    const spellsResponse = await fetch(`${import.meta.env.VITE_API_URL}/spells`);
+                    const spellsResponse = await fetch(`${import.meta.env.VITE_API_URL}/spells/`);
                     if (!spellsResponse.ok) {
                         throw new Error('Failed to fetch spells');
                     }
