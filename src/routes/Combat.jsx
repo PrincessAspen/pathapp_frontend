@@ -39,11 +39,13 @@ const Combat = () => {
                         fetch(`${import.meta.env.VITE_API_URL}/weapons/`)
                     )
                 );
+                if(classDetails.starting_armor){
                 const armorData = await Promise.all(
                     classDetails.starting_armor.map((armorName) =>
                         fetch(`${import.meta.env.VITE_API_URL}/armor/`)
                     )
                 );
+                }   
 
                 const weaponsJson = await Promise.all(weaponsData.map(res => res.json()));
                 const armorJson = await Promise.all(armorData.map(res => res.json()));
@@ -215,9 +217,15 @@ const Combat = () => {
             <div className="flex flex-col md:flex-row justify-center items-center space-x-12 mb-12 p-4 bg-gray-100 rounded-lg shadow-md">
                 <h2 className="text-3xl font-semibold mb-2 text-gray-900">Starting Armor:</h2>
                 <ul className="list-disc pl-6 text-gray-800">
-                    {armor.map((armorItem) => (
-                        <li key={armorItem.name} className="text-2xl">{armorItem.name} - AC Bonus: {armorItem.armor_bonus}</li>
-                    )) || 'No armor available.'}
+                {(armor && armor.length > 0) ? (
+                    armor.map((armorItem) => (
+                    <li key={armorItem.name} className="text-2xl">
+                        {armorItem.name} - AC Bonus: {armorItem.armor_bonus}
+                    </li>
+                    ))
+                ) : (
+                    <li className="text-2xl">No armor available.</li>
+                    )}
                 </ul>
             </div>
         </div>
