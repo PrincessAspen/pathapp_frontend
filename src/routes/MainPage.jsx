@@ -46,11 +46,11 @@ const CharacterOverview = () => {
 
                 const armorDataPromises = (classDetails.starting_armor || [])
                     .filter(item => item && !item.toLowerCase().includes("shield"))
-                    .map(armorName => fetch(`${import.meta.env.VITE_API_URL}/armor?name=${armorName}`));
+                    .map(armorName => fetch(`${import.meta.env.VITE_API_URL}/armor/`));
 
                 const shieldDataPromises = (classDetails.starting_armor || [])
                     .filter(item => item && item.toLowerCase().includes("shield"))
-                    .map(shieldName => fetch(`${import.meta.env.VITE_API_URL}/armor?name=${shieldName}`));
+                    .map(shieldName => fetch(`${import.meta.env.VITE_API_URL}/armor/`));
 
                 const armorJsonResponses = await Promise.all(armorDataPromises);
                 const shieldJsonResponses = await Promise.all(shieldDataPromises);
