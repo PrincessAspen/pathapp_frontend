@@ -36,12 +36,12 @@ const Combat = () => {
 
                 const weaponsData = await Promise.all(
                     classDetails.starting_weapons.map((weaponName) =>
-                        fetch(`${import.meta.env.VITE_API_URL}/weapons?name=${weaponName}`)
+                        fetch(`${import.meta.env.VITE_API_URL}/weapons`)
                     )
                 );
                 const armorData = await Promise.all(
                     classDetails.starting_armor.map((armorName) =>
-                        fetch(`${import.meta.env.VITE_API_URL}/armor?name=${armorName}`)
+                        fetch(`${import.meta.env.VITE_API_URL}/armor`)
                     )
                 );
 
