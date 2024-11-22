@@ -39,13 +39,15 @@ const Combat = () => {
                         fetch(`${import.meta.env.VITE_API_URL}/weapons/`)
                     )
                 );
+
+                let armorData=[]
                 if(classDetails.starting_armor){
-                const armorData = await Promise.all(
-                    classDetails.starting_armor.map((armorName) =>
-                        fetch(`${import.meta.env.VITE_API_URL}/armor/`)
-                    )
-                );
-                }   
+                    armorData = await Promise.all(
+                        classDetails.starting_armor.map((armorName) =>
+                            fetch(`${import.meta.env.VITE_API_URL}/armor/`)
+                        )
+                    ); 
+                }     
 
                 const weaponsJson = await Promise.all(weaponsData.map(res => res.json()));
                 const armorJson = await Promise.all(armorData.map(res => res.json()));
