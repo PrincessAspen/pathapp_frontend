@@ -59,13 +59,25 @@ const Spellcasting = () => {
 
                     const spellSlots = [];
                     const spellSaveDCs = {};
-                    const intelligence = character.stats?.Intelligence || 10; // Default Intelligence is 10
-                    const intelligenceModifier = Math.floor((intelligence - 10) / 2);
+
+                    // Determine casting stat modifier
+                    const statMap = {
+                        1: 'Strength',
+                        2: 'Dexterity',
+                        3: 'Constitution',
+                        4: 'Intelligence',
+                        5: 'Wisdom',
+                        6: 'Charisma',
+                    };
+
+                    const castingStatName = statMap[character.casting_stat];
+                    const castingStatValue = character.stats?.[castingStatName] || 10; // Default stat value is 10
+                    const castingStatModifier = Math.floor((castingStatValue - 10) / 2);
 
                     for (let i = 0; i <= 9; i++) {
                         if (casterDetails[`spell_level_${i}`]) {
                             spellSlots[i] = casterDetails[`spell_level_${i}`];
-                            spellSaveDCs[i] = 10 + intelligenceModifier + i; // Updated formula
+                            spellSaveDCs[i] = 10 + castingStatModifier + i; // Updated formula
                         }
                     }
 
