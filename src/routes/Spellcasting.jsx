@@ -26,7 +26,6 @@ const Spellcasting = () => {
                 const classDetails = await classResponse.json();
                 setClassData(classDetails);
 
-                // Fetch caster type if it's available
                 let casterDetails = null;
                 if (classDetails.caster_type_id) {
                     const casterTypeResponse = await fetch(`${import.meta.env.VITE_API_URL}/caster_types/${classDetails.caster_type_id}`);
@@ -37,7 +36,6 @@ const Spellcasting = () => {
                     setCasterTypeData(casterDetails);
                 }
 
-                // Fetch spells if caster type exists
                 if (casterDetails) {
                     const spellsResponse = await fetch(`${import.meta.env.VITE_API_URL}/spells/`);
                     if (!spellsResponse.ok) {
@@ -60,16 +58,20 @@ const Spellcasting = () => {
                     setSpells(spellsByLevel);
 
                     const spellSlots = [];
+                    const spellSaveDCs = {};
+                    const intelligence = character.stats?.Intelligence || 10; // Default Intelligence is 10
+                    const intelligenceModifier = Math.floor((intelligence - 10) / 2);
+
                     for (let i = 0; i <= 9; i++) {
                         if (casterDetails[`spell_level_${i}`]) {
                             spellSlots[i] = casterDetails[`spell_level_${i}`];
+                            spellSaveDCs[i] = 10 + intelligenceModifier + i; // Updated formula
                         }
                     }
 
                     setSpellcastingData({
-                        spell_attack_bonus: 0,
-                        spell_save_dc: 10 + Math.floor((character.stats?.Charisma || 10) - 10) / 2,
                         spell_slots: spellSlots,
+                        spell_save_dcs: spellSaveDCs,
                         known_spells: Object.values(spellsByLevel).flat(),
                         prepared_spells: [],
                     });
@@ -84,7 +86,7 @@ const Spellcasting = () => {
         };
 
         fetchSpellcastingData();
-    }, [characterId, character]); // Removed casterTypeData as dependency
+    }, [characterId, character]);
 
     if (loading) {
         return <h2 className="text-center text-xl font-semibold text-gray-700">Loading spellcasting data...</h2>;
@@ -94,7 +96,6 @@ const Spellcasting = () => {
         return <h2 className="text-center text-xl font-semibold text-red-600">Error: {error}</h2>;
     }
 
-    // Check if there's no spellcasting data or no spells available
     if (!spellcastingData || Object.keys(spells).length === 0) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-8 bg-artsy">
@@ -111,12 +112,14 @@ const Spellcasting = () => {
             <div className="space-y-6 mb-6">
                 <div className="flex flex-col md:flex-row justify-between items-center">
                     <div className="flex flex-col md:w-1/3">
-                        <h2 className="font-semibold text-3xl text-gray-800">Spell Attack Bonus:</h2>
-                        <p className="text-gray-600 text-2xl">{spellcastingData.spell_attack_bonus}</p>
-                    </div>
-                    <div className="flex flex-col md:w-1/3">
-                        <h2 className="font-semibold text-3xl text-gray-800">Spell Save DC:</h2>
-                        <p className="text-gray-600 text-2xl">{spellcastingData.spell_save_dc}</p>
+                        <h2 className="font-semibold text-3xl text-gray-800">Spell Save DCs:</h2>
+                        <ul className="space-y-2 text-gray-600">
+                            {spellcastingData.spell_save_dcs && Object.entries(spellcastingData.spell_save_dcs).map(([level, dc]) => (
+                                <li key={level} className="flex text-2xl">
+                                    <span>Level {level}: {dc}</span>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 </div>
 
