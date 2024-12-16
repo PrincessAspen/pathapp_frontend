@@ -9,6 +9,7 @@ const Spellcasting = () => {
     const [classData, setClassData] = useState(null);
     const [casterTypeData, setCasterTypeData] = useState(null);
     const [spells, setSpells] = useState({});
+    const [usedSpellSlots, setUsedSpellSlots] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -19,6 +20,7 @@ const Spellcasting = () => {
                     throw new Error('Character or class not found');
                 }
 
+                // Fetch character class data
                 const classResponse = await fetch(`${import.meta.env.VITE_API_URL}/character_classes/${character.characterClassId}`);
                 if (!classResponse.ok) {
                     throw new Error('Failed to fetch class data');
@@ -60,7 +62,6 @@ const Spellcasting = () => {
                     const spellSlots = [];
                     const spellSaveDCs = {};
 
-                    // Determine casting stat modifier
                     const statMap = {
                         1: 'Strength',
                         2: 'Dexterity',
@@ -70,16 +71,24 @@ const Spellcasting = () => {
                         6: 'Charisma',
                     };
 
-                    const castingStatName = statMap[character.casting_stat];
+                    const castingStatName = statMap[classDetails.casting_stat];
+                    if (!castingStatName) {
+                        throw new Error('Invalid casting stat in class data');
+                    }
+
                     const castingStatValue = character.stats?.[castingStatName] || 10; // Default stat value is 10
                     const castingStatModifier = Math.floor((castingStatValue - 10) / 2);
 
+                    const initialUsedSlots = {};
                     for (let i = 0; i <= 9; i++) {
                         if (casterDetails[`spell_level_${i}`]) {
                             spellSlots[i] = casterDetails[`spell_level_${i}`];
                             spellSaveDCs[i] = 10 + castingStatModifier + i; // Updated formula
+                            initialUsedSlots[i] = 0; // Initialize used slots
                         }
                     }
+
+                    setUsedSpellSlots(initialUsedSlots);
 
                     setSpellcastingData({
                         spell_slots: spellSlots,
@@ -99,6 +108,22 @@ const Spellcasting = () => {
 
         fetchSpellcastingData();
     }, [characterId, character]);
+
+    const handleSlotChange = (level, increment) => {
+        setUsedSpellSlots((prevSlots) => {
+            const newUsedSlots = { ...prevSlots };
+            if (increment) {
+                if (newUsedSlots[level] < spellcastingData.spell_slots[level]) {
+                    newUsedSlots[level] += 1;
+                }
+            } else {
+                if (newUsedSlots[level] > 0) {
+                    newUsedSlots[level] -= 1;
+                }
+            }
+            return newUsedSlots;
+        });
+    };
 
     if (loading) {
         return <h2 className="text-center text-xl font-semibold text-gray-700">Loading spellcasting data...</h2>;
@@ -139,11 +164,30 @@ const Spellcasting = () => {
                     <div className="flex flex-col md:w-1/3">
                         <h2 className="font-semibold text-3xl text-gray-800">Spell Slots:</h2>
                         <ul className="space-y-2 text-gray-600">
-                            {spellcastingData.spell_slots && spellcastingData.spell_slots.map((slot, index) => (
-                                <li key={index} className="flex text-2xl">
-                                    <span>Level {index}: {slot} slots</span>
-                                </li>
-                            ))}
+                            {spellcastingData.spell_slots &&
+                                spellcastingData.spell_slots.map((slot, level) => (
+                                    <li key={level} className="flex items-center text-2xl">
+                                        <span className="mr-4">             
+                            Level {level}: {slot - (usedSpellSlots[level] || 0)} / {slot} slots
+                                        </span>
+                                        {level > 0 && ( // Only show the tracker for Level 1+ spells
+                                            <>
+                                                <button
+                                                    onClick={() => handleSlotChange(level, false)}
+                                                    className="px-2 py-1 bg-red-500 text-white rounded mr-2 hover:bg-red-600"
+                                                >
+                                                    -
+                                                </button>
+                                                <button
+                                                    onClick={() => handleSlotChange(level, true)}
+                                    className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                                                >
+                                                    +
+                                                </button>
+                                            </>
+                                        )}
+                                    </li>
+                                ))}
                         </ul>
                     </div>
                 </div>
