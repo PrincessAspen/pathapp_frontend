@@ -12,6 +12,7 @@ import Layout from '../pages/Layout';
 import ProtectedLayout from '../pages/ProtectedLayout';
 import ErrorPage from '../pages/Error';
 import CharacterCreationPage from './Creation';
+import ShopPage from './Shop';
 
 const Routes = () => {
     const publicRoutes = [
@@ -38,6 +39,10 @@ const Routes = () => {
                 {
                     path: "/spellcasting/:characterId",
                     element: <Spellcasting />  // Spellcasting page
+                },
+                {
+                    path: "/shop",
+                    element: <ShopPage /> // Shop Page
                 },
                 {
                     path: '/registration',
