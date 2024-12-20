@@ -27,27 +27,24 @@ const CharacterCreationPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [classRes, raceRes, statRes, skillRes, featRes, alignmentRes] = await Promise.all([
-                    fetchClasses(),
-                    fetchRaces(),
-                    fetchStats(),
-                    fetchSkills(),
-                    fetchFeats(),
-                    fetchAlignments(),
-                ]);
-                setClasses(classRes);
-                setRaces(raceRes);
-                setStats(statRes);
-                setSkills(skillRes);
-                setFeats(featRes);
-                setAlignments(alignmentRes)
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/character_creation_data/`);
+                if (!response.ok) {
+                    throw new Error("Failed to fetch character creation data");
+                }
+                const data = await response.json();
+                
+                // Destructure and set state
+                setClasses(data.classes);
+                setRaces(data.races);
+                setStats(data.stats);
+                setSkills(data.skills);
+                setFeats(data.feats);
+                setAlignments(data.alignments);
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error("Error fetching character creation data:", error);
             }
         };
-
-        console.log("Alignments: ", alignments)
-
+    
         fetchData();
     }, []);
 
@@ -55,36 +52,6 @@ const CharacterCreationPage = () => {
     useEffect(() => {
         console.log("Updated raceId:", tempData.raceId);
     }, [tempData.raceId]); // This will trigger every time raceId changes
-
-    const fetchClasses = async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/character_classes/`);
-        return response.json();
-    };
-
-    const fetchRaces = async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/races/`);
-        return response.json();
-    };
-
-    const fetchStats = async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/stats/`);
-        return response.json();
-    };
-
-    const fetchSkills = async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/skills/`);
-        return response.json();
-    };
-
-    const fetchFeats = async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/feats/`);
-        return response.json();
-    };
-
-    const fetchAlignments = async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/alignments/`);
-        return response.json();  // Assuming there's an endpoint for alignments
-    };
 
     const handleRaceChange = (e) => {
         const selectedRaceId = e.target.value;
